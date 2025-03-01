@@ -3,11 +3,21 @@ const mainRoutes = require("./routes/mainRoutes");
 const app = express();
 const mongoose = require("mongoose");
 require("dotenv").config();
+
+const cors = require("cors");
+
+// Allow requests from your frontend
+app.use(cors({
+  origin: "http://localhost:5173", // Allow frontend to make requests
+  methods: "GET,POST,PUT,DELETE",
+  credentials: true // Allow cookies if needed
+}));
+
 app.use(express.json());
 
-const MONGO_URI = "mongodb+srv://majorproject:YV2MuvkCZu9UsY2K@major.o7qez.mongodb.net/?retryWrites=true&w=majority&appName=Major";
+// const MONGO_URI = "mongodb+srv://majorproject:YV2MuvkCZu9UsY2K@major.o7qez.mongodb.net/?retryWrites=true&w=majority&appName=Major";
 
-// const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/";
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/";
 
 mongoose.connect(MONGO_URI)
 .then(() => {

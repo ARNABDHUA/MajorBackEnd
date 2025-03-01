@@ -8,9 +8,13 @@ const singupStudents = async (req, res) => {
     const {name,phoneNumber,email,password,address,pincode}=req.body;
     try {
         const  existingUser=await Student.findOne({email:email});
-        if (existingUser){
-            return res.status(400).json({message:"user already exists"});
+        const  existingUserPhone=await Student.findOne({phoneNumber:phoneNumber});
+        if (existingUser  ){
+            return res.status(400).json({message:"email already exists"});
         }
+        if (existingUserPhone){
+          return res.status(400).json({message:"phone number already exists"});
+      }
 
         const hashedPassword= await bcrypt.hash(password, 10);
 
