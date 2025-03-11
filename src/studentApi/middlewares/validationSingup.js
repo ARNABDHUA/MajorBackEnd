@@ -13,7 +13,7 @@ const validateSignup = [
 
   check('password')
     .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
-    .matches(/[!@#$%^&*(),.?":{}|<>]/).withMessage('Password must contain at least one special character'),
+    .matches(/[!@#$%^&*(),.?"-=+:{}|<>]/).withMessage('Password must contain at least one special character'),
 
   check('phoneNumber')
     .matches(/^[98765][0-9]{9}$/).withMessage('Phone number must be 10 digits and start with 9, 8, 7, 6, or 5'),
