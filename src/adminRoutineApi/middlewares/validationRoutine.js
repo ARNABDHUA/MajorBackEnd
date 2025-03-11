@@ -54,6 +54,14 @@ const validateAddRoutine = [
   body('days.day3').optional().isArray(),
   body('days.day4').optional().isArray(),
   body('days.day5').optional().isArray(),
+
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: errors.array() });
+    }
+    next();
+  }
 ];
 
 
@@ -85,7 +93,15 @@ const addOrUpdateTimeSlotValidation = [
 
   body("paper_code")
     .exists().withMessage("paper_code is required")
-    .isString().withMessage("paper_code must be a string")
+    .isString().withMessage("paper_code must be a string"),
+
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ message: errors.array() });
+      }
+      next();
+    }
 ];
 
 const deleteTimeSlotValidation = [
@@ -107,44 +123,56 @@ const deleteTimeSlotValidation = [
   
     body('paper_code')
       .notEmpty().withMessage('paper_code is required')
-      .isString().withMessage('paper_code must be a string')
+      .isString().withMessage('paper_code must be a string'),
+
+      (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.status(400).json({ message: errors.array() });
+        }
+        next();
+      }
   ];
 
 
-const updateSlotDetailsValidation = [
-  body('course_id')
-    .notEmpty().withMessage('course_id is required')
-    .isNumeric().withMessage('course_id must be a number'),
+  const updateSlotDetailsValidation = [
+    body('course_id')
+      .notEmpty().withMessage('course_id is required')
+      .isNumeric().withMessage('course_id must be a number'),
+  
+    body('sem')
+      .notEmpty().withMessage('sem is required')
+      .isString().withMessage('sem must be a string'),
+  
+    body('day')
+      .notEmpty().withMessage('day is required')
+      .matches(/^Day\s[1-6]$/).withMessage('day must be in format "Day 1" to "Day 6"'),
+  
+    body('paper_code')
+      .notEmpty().withMessage('paper_code is required')
+      .isString().withMessage('paper_code must be a string'),
+  
+    body('is_live')
+      .notEmpty().withMessage('is_live is required')
+      .isString().withMessage('is_live must be a string'),
+  
+    body('topic')
+      .notEmpty().withMessage('topic is required')
+      .isString().withMessage('topic must be a string'),
+  
+    body('image')
+      .notEmpty().withMessage('image is required')
+      .isString().withMessage('image must be a valid String'),
 
-  body('sem')
-    .notEmpty().withMessage('sem is required')
-    .isString().withMessage('sem must be a string'),
-
-  body('day')
-    .notEmpty().withMessage('day is required')
-    .matches(/^Day\s[1-6]$/).withMessage('day must be in format "Day 1" to "Day 6"'),
-
-  body('paper_code')
-    .notEmpty().withMessage('paper_code is required')
-    .isString().withMessage('paper_code must be a string'),
-
-  // Optional fields for update (can be empty but must be valid types if provided)
-  body('date')
-    .optional()
-    .isISO8601().withMessage('date must be a valid ISO 8601 date (YYYY-MM-DD)'),
-
-  body('is_live')
-    .optional()
-    .isIn(['true', 'false', true, false]).withMessage('is_live must be true or false'),
-
-  body('topic')
-    .optional()
-    .isString().withMessage('topic must be a string'),
-
-  body('image')
-    .optional()
-    .isURL().withMessage('image must be a valid URL')
-];
+      (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.status(400).json({ message: errors.array() });
+        }
+        next();
+      }
+  ];
+  
 
 
 module.exports = { validateAddRoutine , addOrUpdateTimeSlotValidation, deleteTimeSlotValidation, updateSlotDetailsValidation };

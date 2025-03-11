@@ -71,24 +71,32 @@ const addRoutinesNormal = async (req, res) => {
       return res.status(400).json({ message: "All fields are required." });
     }
 
+    const dayKey = day.toLowerCase().replace(" ", "");
     let courseRoutine = await CourseRoutine.findOne({
       course_id,
       course_name,
       sem
     });
 
-    const dayKey = day.toLowerCase().replace(" ", "");
-
     let resMessage = "";
 
-    
-    if (!courseRoutine) {
-      const newTimeSlot = {
-        time,
-        paper,
-        paper_code
-      };
+    // Time slot boundaries
+    const earliestStartTime = parseTime("9:00 A.M");
+    const latestEndTime = parseTime("7:00 P.M"); // Ending at 7:00 P.M (end time of last slot)
 
+    const proposedStartTime = extractStartTime(time);
+    const proposedEndTime = extractEndTime(time);
+
+    // --- Validate: Time is within allowed day slot (9:00 A.M - 7:00 P.M) ---
+    if (proposedStartTime < earliestStartTime || proposedEndTime > latestEndTime) {
+      return res.status(400).json({
+        message: `Time slot must be between 9:00 A.M and 7:00 P.M. Provided slot is from ${formatTime(proposedStartTime)} to ${formatTime(proposedEndTime)}.`
+      });
+    }
+
+    // If no routine exists, create new
+    if (!courseRoutine) {
+      const newTimeSlot = { time, paper, paper_code };
       const newCourseRoutine = new CourseRoutine({
         course_id,
         course_name,
@@ -108,7 +116,6 @@ const addRoutinesNormal = async (req, res) => {
       }
 
       newCourseRoutine.days[dayKey].push(newTimeSlot);
-
       const savedRoutine = await newCourseRoutine.save();
 
       return res.status(201).json({
@@ -117,29 +124,43 @@ const addRoutinesNormal = async (req, res) => {
       });
     }
 
-    
     if (!courseRoutine.days.hasOwnProperty(dayKey)) {
       return res.status(400).json({ message: "Invalid day provided." });
     }
 
     const timeSlots = courseRoutine.days[dayKey];
+
+    // --- Validate: Check if time already exists ---
+    const timeConflict = timeSlots.find(slot => slot.time === time);
+
+    if (timeConflict) {
+      return res.status(400).json({
+        message: `Time slot '${time}' is already assigned to paper '${timeConflict.paper}' with code '${timeConflict.paper_code}'. Please choose a different time.`
+      });
+    }
+
+    // --- Validate: Ensure proposed time starts after the latest slot ---
+    const existingEndTimes = timeSlots.map(slot => extractEndTime(slot.time));
+
+    const latestExistingEndTime = existingEndTimes.length
+      ? existingEndTimes.reduce((a, b) => (a > b ? a : b))
+      : earliestStartTime;
+
+    if (proposedStartTime < latestExistingEndTime) {
+      return res.status(400).json({
+        message: `New time slot must start after the last slot ending at ${formatTime(latestExistingEndTime)}.`
+      });
+    }
+
+    // --- Update if paper_code exists ---
     const existingSlotIndex = timeSlots.findIndex(slot => slot.paper_code === paper_code);
 
     if (existingSlotIndex !== -1) {
-     
       courseRoutine.days[dayKey][existingSlotIndex].time = time;
-
       resMessage = `Time updated for paper_code ${paper_code} on ${day}`;
     } else {
-      
-      const newTimeSlot = {
-        time,
-        paper,
-        paper_code
-      };
-
+      const newTimeSlot = { time, paper, paper_code };
       courseRoutine.days[dayKey].push(newTimeSlot);
-
       resMessage = `New time slot added for ${day}`;
     }
 
@@ -152,9 +173,43 @@ const addRoutinesNormal = async (req, res) => {
 
   } catch (error) {
     console.error("Error adding or updating time slot:", error);
-    res.status(500).json({ message: "Server error", error });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+//helper
+// Convert "9:00 A.M - 10:00 A.M" → start time
+function extractStartTime(timeRange) {
+  const [start] = timeRange.split('-').map(t => t.trim());
+  return parseTime(start);
+}
+
+// Convert "9:00 A.M - 10:00 A.M" → end time
+function extractEndTime(timeRange) {
+  const [, end] = timeRange.split('-').map(t => t.trim());
+  return parseTime(end);
+}
+
+// Parse "12:00 P.M" into a Date object (hour, minute)
+function parseTime(timeStr) {
+  const [time, meridian] = timeStr.split(' ');
+  const [hours, minutes] = time.split(':').map(Number);
+
+  let hour24 = hours;
+  if (meridian.toUpperCase() === 'P.M' && hours !== 12) {
+    hour24 += 12;
+  } else if (meridian.toUpperCase() === 'A.M' && hours === 12) {
+    hour24 = 0;
+  }
+
+  return new Date(1970, 0, 1, hour24, minutes);
+}
+
+// Format time for readable error messages
+function formatTime(dateObj) {
+  const options = { hour: 'numeric', minute: '2-digit', hour12: true };
+  return dateObj.toLocaleTimeString('en-US', options);
+}
 
 
 
@@ -212,7 +267,7 @@ const deleteTimeSlot = async (req, res) => {
 
 const updateSlotDetails = async (req, res) => {
   try {
-    const { course_id, sem, day, paper_code, date, is_live, topic, image } = req.body;
+    const { course_id, sem, day, paper_code, is_live, topic, image } = req.body;
 
     const dayToWeekdayMap = {
       "Day 1": "Monday",
@@ -223,9 +278,12 @@ const updateSlotDetails = async (req, res) => {
       "Day 6": "Saturday"
     };
 
+    // Validate the day input
     if (!dayToWeekdayMap.hasOwnProperty(day)) {
       return res.status(400).json({ message: "Invalid day provided. Use Day 1 to Day 6." });
     }
+
+    // Check if today matches the given day
     const today = new Date();
     const options = { weekday: 'long' };
     const currentDayName = today.toLocaleDateString('en-US', options);
@@ -236,13 +294,33 @@ const updateSlotDetails = async (req, res) => {
       });
     }
 
+    // ---- Calculate date_range for the week ----
+    const currentDayOfWeek = today.getDay(); // Sunday: 0, Monday: 1, ..., Saturday: 6
+    const diffToMonday = (currentDayOfWeek === 0 ? -6 : 1) - currentDayOfWeek;
+
+    const mondayDate = new Date(today);
+    mondayDate.setDate(today.getDate() + diffToMonday);
+
+    const saturdayDate = new Date(mondayDate);
+    saturdayDate.setDate(mondayDate.getDate() + 5); // Monday + 5 days = Saturday
+
+    const startDay = mondayDate.getDate().toString().padStart(2, '0');
+    const endDay = saturdayDate.getDate().toString().padStart(2, '0');
+
+    const monthName = mondayDate.toLocaleString('en-US', { month: 'long' }).toUpperCase();
+
+    const dateRange = `[${startDay}-${endDay}] ${monthName}`;
+
+    // ---- Format current date as YYYY-MM-DD ----
+    const formattedDate = today.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+
+    // ---- Find Course Routine ----
     const courseRoutine = await CourseRoutine.findOne({ course_id, sem });
 
     if (!courseRoutine) {
       return res.status(404).json({ message: "Course routine not found." });
     }
 
-    // Convert "Day 1" → "day1"
     const dayKey = day.toLowerCase().replace(" ", "");
 
     if (!courseRoutine.days.hasOwnProperty(dayKey)) {
@@ -259,15 +337,18 @@ const updateSlotDetails = async (req, res) => {
       });
     }
 
-    if (date !== undefined) {
-      courseRoutine.days[dayKey][slotIndex].date = date;
-    }
+    // ---- Update Fields ----
+    courseRoutine.days[dayKey][slotIndex].date = formattedDate;
+    courseRoutine.days[dayKey][slotIndex].date_range = dateRange;
+
     if (is_live !== undefined) {
       courseRoutine.days[dayKey][slotIndex].is_live = is_live;
     }
+
     if (topic !== undefined) {
       courseRoutine.days[dayKey][slotIndex].topic = topic;
     }
+
     if (image !== undefined) {
       courseRoutine.days[dayKey][slotIndex].image = image;
     }
@@ -275,13 +356,15 @@ const updateSlotDetails = async (req, res) => {
     const updatedRoutine = await courseRoutine.save();
 
     res.status(200).json({
-      message: `Time slot updated for paper_code ${paper_code} on ${day} (${dayToWeekdayMap[day]})`,
+      message: `Time slot updated for paper_code ${paper_code} on ${day} (${dayToWeekdayMap[day]}).`,
+      date: formattedDate,
+      date_range: dateRange,
       data: updatedRoutine
     });
 
   } catch (error) {
     console.error("Error updating time slot details:", error);
-    res.status(500).json({ message: "Server error", error });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
