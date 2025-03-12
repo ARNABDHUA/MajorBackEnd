@@ -368,8 +368,37 @@ const updateSlotDetails = async (req, res) => {
   }
 };
 
+const getRoutineByCourseIdAndSem = async (req, res) => {
+  try {
+    const { course_id, sem } = req.params;
 
+    if (!course_id || !sem) {
+      return res.status(400).json({ message: 'Both course_id and sem are required' });
+    }
 
+    const query = {
+      course_id: Number(course_id), 
+      sem: sem.toString()           
+    };
+
+    const routines = await CourseRoutine.find(query);
+
+    if (!routines || routines.length === 0) {
+      return res.status(404).json({
+        message: 'No routine found for the given course_id and sem'
+      });
+    }
+
+    res.status(200).json({
+      message: 'Routine data fetched successfully',
+      data: routines
+    });
+
+  } catch (error) {
+    console.error('Error fetching routine data:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
 
 const deleteRoutine = async (req, res) => {
   try {
@@ -394,4 +423,4 @@ const deleteRoutine = async (req, res) => {
   }
 };
 
-module.exports = { getAllReotines, addRoutines, deleteRoutine,addRoutinesNormal ,deleteTimeSlot ,updateSlotDetails };
+module.exports = { getAllReotines, addRoutines, deleteRoutine,addRoutinesNormal ,deleteTimeSlot ,updateSlotDetails , getRoutineByCourseIdAndSem};

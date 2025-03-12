@@ -8,9 +8,8 @@ const cors = require("cors");
 
 // Allow requests from your frontend
 app.use(cors({
-  origin: "http://localhost:5173", // Allow frontend to make requests
-  methods: "GET,POST,PUT,DELETE",
-  credentials: true // Allow cookies if needed
+  origin: '*', 
+  credentials: true 
 }));
 
 app.use(express.json());

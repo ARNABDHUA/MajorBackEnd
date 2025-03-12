@@ -30,4 +30,23 @@ const validateSignup = [
   }
 ];
 
-module.exports = { validateSignup };
+const validateLogIn = [
+  
+check('email')
+  .isEmail().withMessage('Invalid email format')
+  .matches(/@gmail\.com$/).withMessage('Only Gmail addresses are allowed'),
+
+check('password')
+  .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
+  .matches(/[!@#$%^&*(),.?"-=+:{}|<>]/).withMessage('Password must contain at least one special character'),
+
+(req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() });
+  }
+  next();
+}
+];
+
+module.exports = { validateSignup ,validateLogIn};

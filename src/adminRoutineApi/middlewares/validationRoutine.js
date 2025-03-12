@@ -1,4 +1,4 @@
-const { body, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 
 const validateAddRoutine = [
   body('course_id')
@@ -174,5 +174,23 @@ const deleteTimeSlotValidation = [
   ];
   
 
+  const validateRoutineParams = [
+    param('course_id')
+      .notEmpty().withMessage('course_id is required')
+      .isNumeric().withMessage('course_id must be a number'),
+  
+    param('sem')
+      .notEmpty().withMessage('sem is required')
+      .isString().withMessage('sem must be a string'),
 
-module.exports = { validateAddRoutine , addOrUpdateTimeSlotValidation, deleteTimeSlotValidation, updateSlotDetailsValidation };
+      (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.status(400).json({ message: errors.array() });
+        }
+        next();
+      }
+  ];
+
+
+module.exports = { validateAddRoutine , addOrUpdateTimeSlotValidation, deleteTimeSlotValidation, updateSlotDetailsValidation ,validateRoutineParams };
