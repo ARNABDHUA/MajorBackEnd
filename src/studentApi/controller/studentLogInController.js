@@ -33,7 +33,7 @@ const singupStudents = async (req, res) => {
     const token = jwt.sign(
       { email: result.email, id: result._id },
       SECRET_KEY,
-      { expiresIn: "3h" }  // Token valid for 3 hours
+      { expiresIn: "5h" }  // Token valid for 5 hours
     );
 
     res.status(201).json({ user: result, token: token });
@@ -64,7 +64,7 @@ const singinStudents = async (req, res) => {
     const token = jwt.sign(
       { email: existingUser.email, id: existingUser._id },
       SECRET_KEY,
-      { expiresIn: "3h" }  // Token valid for 3 hours
+      { expiresIn: "5h" }  // Token valid for 5 hours
     );
 
     res.status(201).json({ user: existingUser, token: token });

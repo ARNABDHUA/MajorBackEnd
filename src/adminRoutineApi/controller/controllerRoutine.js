@@ -423,4 +423,56 @@ const deleteRoutine = async (req, res) => {
   }
 };
 
-module.exports = { getAllReotines, addRoutines, deleteRoutine,addRoutinesNormal ,deleteTimeSlot ,updateSlotDetails , getRoutineByCourseIdAndSem};
+
+const getAllRoutinbycourse_id = async (req, res) => {
+  try {
+    // Extract params and trim any potential whitespace
+    const courseId = req.params.course_id?.trim();
+    const sem = req.params.sem?.trim();
+
+    // Validate required fields
+    if (!courseId || !sem) {
+      return res.status(400).json({
+        success: false,
+        message: 'Both course_id and sem are required'
+      });
+    }
+
+    // Build query object
+    const query = {
+      course_id: Number(courseId), // Convert to number if your schema stores it as a number
+      sem: sem.toString()          // Ensure it's a string if stored as such
+    };
+
+    // Fetch routines based on query
+    const routines = await CourseRoutine.find(query);
+
+    // If no routines found, send a 404 response
+    if (!routines || routines.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No routine found for course_id ${courseId} and sem ${sem}`
+      });
+    }
+
+    // Success response with data
+    res.status(200).json({
+      success: true,
+      message: 'Routine data fetched successfully',
+      data: routines
+    });
+
+  } catch (error) {
+    console.error('Error fetching routine data:', error.message);
+
+    // Error response
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching routine data',
+      error: error.message
+    });
+  }
+};
+
+
+module.exports = { getAllReotines, addRoutines, deleteRoutine,addRoutinesNormal ,deleteTimeSlot ,updateSlotDetails , getRoutineByCourseIdAndSem , getAllRoutinbycourse_id};

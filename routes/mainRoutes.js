@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const studentRoutes = require("../src/studentApi/route/studentRoute");
-const teacherRoutes = require("../src/teacherApi/teacherRoutes");
+const teacherRoutes = require("../src/teacherApi/route/teacherRoutes");
 const adminRoutineApi = require("../src/adminRoutineApi/routes/adminRoutineApi");
 
 router.use("/students", studentRoutes);

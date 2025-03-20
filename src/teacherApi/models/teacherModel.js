@@ -1,0 +1,51 @@
+const mongoose = require('mongoose');
+
+const teacherSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  c_roll: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  phoneNumber: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  address: {
+    type: String
+  },
+  salary: {
+    type: Number
+  },
+  image: {
+    type: String // Store image path or URL
+  },
+  teacher_course: {
+    type: [String], // e.g. ['MCA-203', 'BTECH-404']
+    default: []
+  },
+  qualification: {
+    type: [String], // e.g. ['HS', 'BTECH', 'MTECH']
+    default: []
+  },
+  rating: {
+    type: Number,
+    default: 0
+  },
+  expertise: {
+    type: [String], // e.g. ['Advanced Mathematics', 'Curriculum Design']
+    default: []
+  }
+}, {
+  timestamps: true
+});
+
+module.exports = mongoose.model('Teacher', teacherSchema);
