@@ -17,9 +17,9 @@ router.post("/course-routines/:course_id", deleteRoutine);
 
 router.post("/add-course-routine", addOrUpdateTimeSlotValidation, addRoutinesNormal );
 
-router.post("/delete-time-slot",auth,deleteTimeSlotValidation, deleteTimeSlot );
+router.post("/delete-time-slot",deleteTimeSlotValidation, deleteTimeSlot );
 
-router.post("/teacher-update-time-slot",auth,updateSlotDetailsValidation, updateSlotDetails );
+router.post("/teacher-update-time-slot",updateSlotDetailsValidation, updateSlotDetails );
 
 router.post("/routine/:course_id/:sem",auth,validateRoutineParams, getRoutineByCourseIdAndSem );
 

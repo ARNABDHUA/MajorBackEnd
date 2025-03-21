@@ -5,6 +5,10 @@ const teacherSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  password: { 
+    type: String, 
+    required: true 
+  },
   c_roll: {
     type: String,
     required: true,
@@ -33,7 +37,13 @@ const teacherSchema = new mongoose.Schema({
     default: []
   },
   qualification: {
-    type: [String], // e.g. ['HS', 'BTECH', 'MTECH']
+    type: [
+      {
+        degree: String,
+        institution: String,
+        year: String
+      }
+    ], // e.g. ['HS', 'BTECH', 'MTECH']
     default: []
   },
   rating: {
