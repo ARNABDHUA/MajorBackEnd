@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 // const CourseRoutine = require("./models/routineModels");
-const { getAllReotines, addRoutines, deleteRoutine , addRoutinesNormal,deleteTimeSlot, updateSlotDetails , getRoutineByCourseIdAndSem, getAllRoutinbycourse_id} = require("../controller/controllerRoutine");
+const { getAllReotines, addRoutines, deleteRoutine , addRoutinesNormal,deleteTimeSlot, updateSlotDetails , getRoutineByCourseIdAndSem, getAllRoutinbycourse_id,getAllCourses,createCourse} = require("../controller/controllerRoutine");
 const auth = require("../../../authMiddlewares/auth");
-const {validateAddRoutine,  addOrUpdateTimeSlotValidation,deleteTimeSlotValidation, updateSlotDetailsValidation, validateRoutineParams} =require("../middlewares/validationRoutine");
+const {validateAddRoutine,  addOrUpdateTimeSlotValidation,deleteTimeSlotValidation, updateSlotDetailsValidation, validateRoutineParams,validateCourse} =require("../middlewares/validationRoutine");
 
 router.get("/", (req, res) => {
   res.send("Get all admin Routine");
@@ -24,6 +24,10 @@ router.post("/teacher-update-time-slot",updateSlotDetailsValidation, updateSlotD
 router.post("/routine/:course_id/:sem",auth,validateRoutineParams, getRoutineByCourseIdAndSem );
 
 router.post("/routine-all/:course_id/:sem",validateRoutineParams, getAllRoutinbycourse_id );
+
+router.post("/course-all", getAllCourses );
+
+router.post("/create-course",validateCourse, createCourse);
 
 
 module.exports = router;

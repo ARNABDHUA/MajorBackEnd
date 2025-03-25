@@ -192,5 +192,25 @@ const deleteTimeSlotValidation = [
       }
   ];
 
+  const validateCourse = [
+    body("course_id").isNumeric().withMessage("Course ID must be a number"),
+    body("name").isString().notEmpty().withMessage("Name is required"),
+    body("code").isString().notEmpty().withMessage("Code is required"),
+    body("description").isString().notEmpty().withMessage("Description is required"),
+    body("imageUrl").isString().notEmpty().withMessage("Image URL is required"),
+    body("bgColor").isString().notEmpty().withMessage("Background color is required"),
+    body("duration").isString().notEmpty().withMessage("Duration is required"),
+    body("instructor").isString().notEmpty().withMessage("Instructor is required"),
+    // body("students").isNumeric().isInt({ min: 0 }).withMessage("Students count must be a positive number"),
 
-module.exports = { validateAddRoutine , addOrUpdateTimeSlotValidation, deleteTimeSlotValidation, updateSlotDetailsValidation ,validateRoutineParams };
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ message: errors.array() });
+      }
+      next();
+    }
+  ];
+
+
+module.exports = { validateAddRoutine , addOrUpdateTimeSlotValidation, deleteTimeSlotValidation, updateSlotDetailsValidation ,validateRoutineParams,validateCourse };

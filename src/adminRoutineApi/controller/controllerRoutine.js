@@ -1,5 +1,5 @@
 const CourseRoutine = require("../models/routineModels");
-
+const Course = require("../models/courseModel");
 const getAllReotines = async (req, res) => {
   const { course_id } = req.body;
   try {
@@ -474,5 +474,28 @@ const getAllRoutinbycourse_id = async (req, res) => {
   }
 };
 
+const getAllCourses = async (req, res) => {
+  try {
+    const courses = await Course.find();
+    res.json(courses);
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving courses" });
+  }
+};
 
-module.exports = { getAllReotines, addRoutines, deleteRoutine,addRoutinesNormal ,deleteTimeSlot ,updateSlotDetails , getRoutineByCourseIdAndSem , getAllRoutinbycourse_id};
+const createCourse = async (req, res) => {
+ 
+  try {
+    const existingCourse = await Course.findOne({ course_id: req.body.course_id });
+    if (existingCourse) {
+      return res.status(400).json({ message: "Course ID already exists" });
+    }
+    const newCourse = new Course(req.body);
+    await newCourse.save();
+    res.status(201).json(newCourse);
+  } catch (error) {
+    console.error("Error creating course:", error); // Log the error to see details
+    res.status(500).json({ message: "Error creating course", error: error.message });
+  }
+};
+module.exports = { getAllReotines, addRoutines, deleteRoutine,addRoutinesNormal ,deleteTimeSlot ,updateSlotDetails , getRoutineByCourseIdAndSem , getAllRoutinbycourse_id,getAllCourses, createCourse};
