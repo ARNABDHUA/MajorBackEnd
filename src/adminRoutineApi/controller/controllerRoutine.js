@@ -483,6 +483,31 @@ const getAllCourses = async (req, res) => {
   }
 };
 
+const getAllCoursesBYId = async (req, res) => {
+  try {
+    const { course_id } = req.query;
+
+    let courses;
+
+    if (course_id) {
+      // Convert course_id to number (if your DB stores it as number)
+      courses = await Course.find({ course_id: Number(course_id) });
+
+      if (courses.length === 0) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+    } else {
+      courses = await Course.find();
+    }
+
+    res.json(courses);
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving courses" });
+  }
+};
+
+
+
 const createCourse = async (req, res) => {
  
   try {
@@ -498,4 +523,4 @@ const createCourse = async (req, res) => {
     res.status(500).json({ message: "Error creating course", error: error.message });
   }
 };
-module.exports = { getAllReotines, addRoutines, deleteRoutine,addRoutinesNormal ,deleteTimeSlot ,updateSlotDetails , getRoutineByCourseIdAndSem , getAllRoutinbycourse_id,getAllCourses, createCourse};
+module.exports = { getAllReotines, addRoutines, deleteRoutine,addRoutinesNormal ,deleteTimeSlot ,updateSlotDetails , getRoutineByCourseIdAndSem , getAllRoutinbycourse_id,getAllCourses, createCourse,getAllCoursesBYId};
