@@ -7,14 +7,29 @@ const studentSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   address: { type: String, required: true },
+  state: { type: String, required: true },
+  city: { type: String, required: true },
   pincode: { type: String, required: true },
+  gender :{ type: String, required: true },
   course_code: { type: String, default: null },
   c_roll: { type: String, default: null },
   e_roll: { type: String, default: null },
-  tenth: { type: Number, default: null },
-  twelfth: { type: Number, default: null },
-  ug: { type: Number, default: null },
-  pg: { type: Number, default: null }
+  tenth_marks: { type: Number, default: null },
+  tenth_year: { type: Number, default: null },
+  twelfth_marks: { type: Number, default: null },
+  twelfth_year: { type: Number, default: null },
+  ug_name: { type: String, default: null },
+  ug_marks: { type: Number, default: null },
+  ug_start: { type: Number, default: null },
+  ug_end: { type: Number, default: null },
+  other_course: { type: String, default: null },
+  other_course_marks: { type: Number, default: null },
+  other_course_start: { type: Number, default: null },
+  other_course_end: { type: Number, default: null },
+  pic: {
+    type: String,
+    default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+  },
 }, {
   timestamps: true
 });

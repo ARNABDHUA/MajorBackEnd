@@ -5,7 +5,7 @@ const jwt=require("jsonwebtoken");
 const SECRET_KEY="helloApSfS";
 
 const singupStudents = async (req, res) => {
-  const { name, phoneNumber, email, password, address, pincode } = req.body;
+  const { name, phoneNumber, email, password, address, pincode,gender,city,state } = req.body;
 
   try {
     const existingUser = await Student.findOne({ email: email });
@@ -27,7 +27,10 @@ const singupStudents = async (req, res) => {
       email: email,
       password: hashedPassword,
       address: address,
-      pincode: pincode
+      pincode: pincode,
+      gender:gender,
+      city:city,
+      state:state
     });
 
     const token = jwt.sign(
