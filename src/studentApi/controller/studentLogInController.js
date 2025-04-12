@@ -214,6 +214,7 @@ const generateCRoll = async (req, res) => {
     const paddedRoll = String(newRollNumber).padStart(4, '0');
     const c_roll = `${rollPrefix}${paddedRoll}`;
 
+    student.payment= true;
     student.c_roll = c_roll;
     student.course_code = course_code; // optionally update course_code
     await student.save();
