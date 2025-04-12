@@ -3,6 +3,17 @@ const mainRoutes = require("./routes/mainRoutes");
 const app = express();
 const mongoose = require("mongoose");
 require("dotenv").config();
+const crypto = require("crypto");
+const axios = require("axios");
+
+// app.use(cors());
+// app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+
 
 const cors = require("cors");
 
@@ -31,6 +42,99 @@ app.get('/', (req, res) => {
 });
 
 app.use("/v1", mainRoutes);
+
+
+
+//payment 
+
+// Configuration for Cashfree API
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const BASE_URL = "https://sandbox.cashfree.com/pg/orders"; // Use 'https://api.cashfree.com/pg/orders' for production
+
+function generateOrderId() {
+  const uniqueId = crypto.randomBytes(16).toString("hex");
+  const hash = crypto.createHash("sha256");
+  hash.update(uniqueId);
+  const orderId = hash.digest("hex");
+  return orderId.substr(0, 12);
+}
+
+
+app.post("/payment", async (req, res) => {
+  try {
+    const orderId = await generateOrderId();
+    const {userId,name,email,phone}= req.body
+
+    // Create order using direct API calls instead of SDK
+    const orderData = {
+      order_id: orderId,
+      order_amount: 10000.0,
+      order_currency: "INR",
+      customer_details: {
+        customer_id: userId,
+        customer_name: name,
+        customer_email:email,
+        customer_phone: phone,
+      },
+      order_meta: {
+        return_url: "http://localhost:5173?order_id={order_id}",
+        notify_url: "https://webhook.site", // Replace with your webhook URL if needed
+      },
+    };
+
+    const response = await axios.post(BASE_URL, orderData, {
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-version": "2022-09-01",
+        "x-client-id": CLIENT_ID,
+        "x-client-secret": CLIENT_SECRET,
+      },
+    });
+
+    // console.log("Order created:", response.data);
+    res.json(response.data);
+  } catch (error) {
+    console.log(
+      "Error creating order:",
+      error.response ? error.response.data : error.message
+    );
+    res
+      .status(500)
+      .json({ error: error.response ? error.response.data : error.message });
+  }
+});
+
+app.post("/verify", async (req, res) => {
+  try {
+    let { orderId } = req.body;
+
+    if (!orderId) {
+      return res.status(400).json({ error: "Order ID is required" });
+    }
+
+    // Get payment details using direct API call
+    const response = await axios.get(`${BASE_URL}/${orderId}/payments`, {
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-version": "2022-09-01",
+        "x-client-id": CLIENT_ID,
+        "x-client-secret": CLIENT_SECRET,
+      },
+    });
+
+    // console.log("Payment details:", response.data);
+    res.json(response.data);
+  } catch (error) {
+    console.log(
+      "Error verifying payment:",
+      error.response ? error.response.data : error.message
+    );
+    res
+      .status(500)
+      .json({ error: error.response ? error.response.data : error.message });
+  }
+});
 
 const PORT = 3000;
 const server=app.listen(PORT, () => {
@@ -77,3 +181,7 @@ io.on("connection", (socket) => {
     socket.leave(userData._id);
   });
 });
+
+
+//okkk
+
