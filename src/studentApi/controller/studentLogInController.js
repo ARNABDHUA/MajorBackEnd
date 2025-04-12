@@ -172,46 +172,66 @@ const generateCRoll = async (req, res) => {
   const { course_code, email } = req.body;
 
   try {
-    // Find student by email
     const student = await Student.findOne({ email });
 
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    // Check if c_roll already exists
+    // If c_roll already exists
     if (student.c_roll) {
       return res.status(200).json({
-        message: "You already have a roll",
+        name: student.name,
+        email: student.email,
+        phoneNumber: student.phoneNumber,
         c_roll: student.c_roll,
+        e_roll: student.e_roll,
+        address: student.address,
+        state: student.state,
+        city: student.city,
+        pincode: student.pincode,
+        gender: student.gender,
+        course_code: student.course_code,
+        pic: student.pic,
+        payment: student.payment
       });
     }
 
     const year = new Date().getFullYear().toString(); // e.g., "2025"
-    const rollPrefix = `${course_code}${year}`;       // e.g., "1012025"
+    const rollPrefix = `${course_code}${year}`;
 
-    // Find last student with the same course_code and year
     const regex = new RegExp(`^${rollPrefix}`);
     const lastStudent = await Student.findOne({ c_roll: { $regex: regex } })
-      .sort({ c_roll: -1 }); // Sort descending to get the highest
+      .sort({ c_roll: -1 });
 
     let newRollNumber = 1;
 
     if (lastStudent && lastStudent.c_roll) {
-      const lastRoll = lastStudent.c_roll.slice(-4); // Last 4 digits
+      const lastRoll = lastStudent.c_roll.slice(-4);
       newRollNumber = parseInt(lastRoll) + 1;
     }
 
     const paddedRoll = String(newRollNumber).padStart(4, '0');
-    const c_roll = `${rollPrefix}${paddedRoll}`; // e.g., "10120250001"
+    const c_roll = `${rollPrefix}${paddedRoll}`;
 
-    // Update student with generated c_roll
     student.c_roll = c_roll;
+    student.course_code = course_code; // optionally update course_code
     await student.save();
 
     res.status(200).json({
-      message: "Roll generated successfully",
-      c_roll,
+      name: student.name,
+      email: student.email,
+      phoneNumber: student.phoneNumber,
+      c_roll: student.c_roll,
+      e_roll: student.e_roll,
+      address: student.address,
+      state: student.state,
+      city: student.city,
+      pincode: student.pincode,
+      gender: student.gender,
+      course_code: student.course_code,
+      pic: student.pic,
+      payment: student.payment
     });
 
   } catch (error) {
@@ -219,6 +239,7 @@ const generateCRoll = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 
