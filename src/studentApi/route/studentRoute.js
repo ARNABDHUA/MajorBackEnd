@@ -13,7 +13,7 @@ router.post("/student-singup",validateSignup, singupStudents);
 
 router.post("/student-singin",validateLogIn, singinStudents);
 
-router.post("/student-academic",auth, addStudentAcademicDetails);
+router.post("/student-academic", addStudentAcademicDetails);
 
 router.post("/student-rollgenerate", generateCRoll);
 
