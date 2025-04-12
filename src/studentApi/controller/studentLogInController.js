@@ -67,10 +67,43 @@ const singinStudents = async (req, res) => {
     const token = jwt.sign(
       { email: existingUser.email, id: existingUser._id },
       SECRET_KEY,
-      { expiresIn: "5h" }  // Token valid for 5 hours
+      { expiresIn: "5h" }
     );
 
-    res.status(201).json({ user: existingUser, token: token });
+    const {
+      name,
+      email: userEmail,
+      phoneNumber,
+      c_roll,
+      e_roll,
+      address,
+      state,
+      city,
+      pincode,
+      gender,
+      course_code,
+      pic,
+      payment,
+    } = existingUser;
+
+    res.status(201).json({
+      user: {
+        name,
+        email: userEmail,
+        phoneNumber,
+        c_roll,
+        e_roll,
+        address,
+        state,
+        city,
+        pincode,
+        gender,
+        course_code,
+        pic,
+        payment,
+      },
+      token,
+    });
 
   } catch (error) {
     console.error('Signin Error:', error);
@@ -79,4 +112,62 @@ const singinStudents = async (req, res) => {
 };
 
 
-module.exports = { singupStudents, singinStudents };
+const addStudentAcademicDetails = async (req, res) => {
+  const {
+    email,
+    course_code,
+    tenth_marks,
+    tenth_year,
+    twelfth_marks,
+    twelfth_year,
+    ug_name,
+    ug_marks,
+    ug_start,
+    ug_end,
+    other_course,
+    other_course_marks,
+    other_course_start,
+    other_course_end,
+    rank,
+  } = req.body;
+
+  try {
+    const updatedStudent = await Student.findOneAndUpdate(
+      { email: email },
+      {
+        course_code,
+        tenth_marks,
+        tenth_year,
+        twelfth_marks,
+        twelfth_year,
+        ug_name,
+        ug_marks,
+        ug_start,
+        ug_end,
+        other_course,
+        other_course_marks,
+        other_course_start,
+        other_course_end,
+        rank,
+      },
+      { new: true }
+    );
+
+    if (!updatedStudent) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.status(200).json({
+      message: "Academic details updated successfully",
+      student: updatedStudent,
+    });
+  } catch (error) {
+    console.error("Update Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+module.exports = { singupStudents, singinStudents , addStudentAcademicDetails};
