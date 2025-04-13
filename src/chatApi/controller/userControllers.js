@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const cloudinary =require("./cloudinary.js");
 const fs = require("fs");
+const Student=require("../../studentApi/models/studentLogInModels");
 
 const registerUser = async (req, res) => {
     const { name, email } = req.body;
@@ -109,4 +110,45 @@ const allUsers = async (req, res) => {
     }
   };
 
-  module.exports = { registerUser,chatUser ,allUsers,updateUserImage};
+  const getImage = async (req, res) => {
+    try {
+      const { email } = req.body;
+  
+      // Validate email
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+  
+      // Find student by email
+      const student = await Student.findOne({ email });
+      if (!student) {
+        return res.status(404).json({ error: "Student not found" });
+      }
+  
+      // Update user pic using student.pic
+      const updatedUser = await User.findOneAndUpdate(
+        { email },
+        { pic: student.pic },
+        { new: true }
+      );
+  
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+  
+      res.status(200).json({
+        message: "User profile image updated from student data",
+        user: {
+          name: updatedUser.name,
+          email: updatedUser.email,
+          pic: updatedUser.pic,
+        },
+      });
+    } catch (error) {
+      console.error("Error updating user image:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  };
+  
+
+  module.exports = { registerUser,chatUser ,allUsers,updateUserImage,getImage};
