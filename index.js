@@ -5,17 +5,15 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 const crypto = require("crypto");
 const axios = require("axios");
+const fileupload =require("express-fileupload");
+const path =require("path");
+const cors = require("cors");
 
-// app.use(cors());
-// app.use(express.json());
 app.use(
   express.urlencoded({
     extended: true,
   })
 );
-
-
-const cors = require("cors");
 
 // Allow requests from your frontend
 app.use(cors({
@@ -24,6 +22,16 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+
+app.use(
+  fileupload({
+    useTempFiles: true,
+    tempFileDir: path.join(path.resolve(), 'temp'),
+    createParentPath: true,
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB limit for videos
+  })
+);
 
 // const MONGO_URI = "mongodb+srv://majorproject:YV2MuvkCZu9UsY2K@major.o7qez.mongodb.net/?retryWrites=true&w=majority&appName=Major";
 
