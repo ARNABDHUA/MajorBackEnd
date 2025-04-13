@@ -1,4 +1,6 @@
 const User = require("../models/userModel");
+const cloudinary =require("./cloudinary.js");
+const fs = require("fs");
 
 const registerUser = async (req, res) => {
     const { name, email } = req.body;
@@ -66,5 +68,45 @@ const allUsers = async (req, res) => {
     res.send(users);
   };
 
+  const updateUserImage = async (req, res) => {
+    try {
+      const { email } = req.body;
+  
+      // Check required fields
+      if (!email || !req.files || !req.files.image) {
+        return res.status(400).json({ error: "Email and image are required" });
+      }
+  
+      // Upload image to Cloudinary
+      const imageResult = await cloudinary.uploader.upload(
+        req.files.image.tempFilePath,
+        {
+          folder: "users/profile_images",
+          resource_type: "image",
+        }
+      );
+  
+      // Delete temp file
+      fs.unlinkSync(req.files.image.tempFilePath);
+  
+      // Find user by email and update pic
+      const updatedUser = await User.findOneAndUpdate(
+        { email },
+        { pic: imageResult.secure_url },
+        { new: true }
+      );
+  
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+  
+      res
+        .status(200)
+        .json({ message: "Profile picture updated", user: updatedUser });
+    } catch (error) {
+      console.error("Error updating user image:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  };
 
-  module.exports = { registerUser,chatUser ,allUsers};
+  module.exports = { registerUser,chatUser ,allUsers,updateUserImage};

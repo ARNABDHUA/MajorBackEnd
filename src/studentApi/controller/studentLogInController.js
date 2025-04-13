@@ -1,6 +1,8 @@
 const Student=require("../models/studentLogInModels");
 const bcrypt=require("bcrypt");
 const jwt=require("jsonwebtoken");
+const cloudinary =require("./cloudinary.js");
+const fs = require("fs");
 
 const SECRET_KEY="helloApSfS";
 
@@ -242,7 +244,66 @@ const generateCRoll = async (req, res) => {
 };
 
 
+const updateStudentProfile = async (req, res) => {
+  try {
+    const { email, name, address, pincode } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required to find student" });
+    }
+
+    const student = await Student.findOne({ email });
+
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Upload new profile image if provided
+    if (req.files && req.files.image) {
+      const imageResult = await cloudinary.uploader.upload(
+        req.files.image.tempFilePath,
+        {
+          folder: "students/profile_images",
+          resource_type: "image",
+        }
+      );
+
+      fs.unlinkSync(req.files.image.tempFilePath);
+      student.pic = imageResult.secure_url;
+    }
+
+    // Update other fields if provided
+    if (name) student.name = name;
+    if (address) student.address = address;
+    // if (state) student.state = state;
+    // if (city) student.city = city;
+    if (pincode) student.pincode = pincode;
+
+    await student.save();
+
+    // Custom response
+    const response = {
+      name: student.name,
+      email: student.email,
+      phoneNumber: student.phoneNumber,
+      c_roll: student.c_roll,
+      e_roll: student.e_roll,
+      address: student.address,
+      state: student.state,
+      city: student.city,
+      pincode: student.pincode,
+      gender: student.gender,
+      course_code: student.course_code,
+      pic: student.pic,
+      payment: student.payment,
+    };
+
+    res.status(200).json({ message: "Student profile updated", student: response });
+  } catch (error) {
+    console.error("Error updating student:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
 
 
-
-module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll};
+module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile};
