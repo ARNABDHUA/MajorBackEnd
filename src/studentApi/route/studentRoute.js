@@ -11,7 +11,7 @@ router.get("/", (req, res) => {
 
 router.post("/student-singup",validateSignup, singupStudents);
 
-router.post("/student-singin",validateLogIn, singinStudents);
+router.post("/student-singin", singinStudents);
 
 router.post("/student-academic", addStudentAcademicDetails);
 

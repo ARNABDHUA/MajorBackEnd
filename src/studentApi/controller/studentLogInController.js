@@ -246,7 +246,7 @@ const generateCRoll = async (req, res) => {
 
 const updateStudentProfile = async (req, res) => {
   try {
-    const { email, name, address, pincode } = req.body;
+    const { email, address, pincode,state,city } = req.body;
 
     if (!email) {
       return res.status(400).json({ error: "Email is required to find student" });
@@ -273,10 +273,10 @@ const updateStudentProfile = async (req, res) => {
     }
 
     // Update other fields if provided
-    if (name) student.name = name;
+    // if (name) student.name = name;
     if (address) student.address = address;
-    // if (state) student.state = state;
-    // if (city) student.city = city;
+    if (state) student.state = state;
+    if (city) student.city = city;
     if (pincode) student.pincode = pincode;
 
     await student.save();
