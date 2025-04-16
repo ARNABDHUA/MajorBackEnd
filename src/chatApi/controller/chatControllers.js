@@ -177,4 +177,70 @@ const accessChat =async (req, res) => {
   };
 
 
-  module.exports = { accessChat,fetchChats,createGroupChat, renameGroup, addToGroup,removeFromGroup};
+  const updateGroupChatAdminMode = async (req, res) => {
+    const {ownId, chatId, adminOnlyMode } = req.body;
+  
+    // Validate request data
+    if (!chatId) {
+      return res.status(400).json({ message: "Chat ID is required" });
+    }
+  
+    if (typeof adminOnlyMode !== "boolean") {
+      return res.status(400).json({ message: "adminOnlyMode must be a boolean value" });
+    }
+  
+    try {
+      // Find the chat by ID
+      const chat = await Chat.findById(chatId);
+  
+      // Check if chat exists and is a group chat
+      if (!chat || !chat.isGroupChat) {
+        return res.status(404).json({ message: "Group chat not found" });
+      }
+  
+      // Check if the requesting user is the admin
+      if (chat.groupAdmin.toString() !== ownId) {
+        return res.status(403).json({ message: "Only admin can update group settings" });
+      }
+  
+      // Update the admin mode setting
+      chat.adminOnlyMode = adminOnlyMode;
+      await chat.save();
+  
+      // Return the updated chat with populated user fields
+      const updatedChat = await Chat.findById(chatId)
+        .populate("users", "-password")
+        .populate("groupAdmin", "-password");
+  
+      res.json(updatedChat);
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  };
+
+
+  const getChatById = async (req, res) => {
+    const { chatId } = req.body;
+  
+    if (!chatId) {
+      return res.status(400).json({ message: "Chat ID is required" });
+    }
+  
+    try {
+      const chat = await Chat.findById(chatId)
+        .populate("users", "-password")
+        .populate("groupAdmin", "-password");
+  
+      if (!chat) {
+        return res.status(404).json({ message: "Chat not found" });
+      }
+  
+      res.status(200).json(chat);
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  };
+  
+  
+
+  module.exports = { accessChat,fetchChats,createGroupChat, renameGroup, addToGroup,removeFromGroup,updateGroupChatAdminMode,getChatById};
