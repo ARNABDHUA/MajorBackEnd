@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 // const CourseRoutine = require("./models/routineModels");
-const { getAllReotines, addRoutines, deleteRoutine , addRoutinesNormal,deleteTimeSlot, updateSlotDetails , getRoutineByCourseIdAndSem, getAllRoutinbycourse_id,getAllCourses,createCourse,getAllCoursesBYId} = require("../controller/controllerRoutine");
+const { getAllReotines, addRoutines, deleteRoutine , addRoutinesNormal,deleteTimeSlot, updateSlotDetails , getRoutineByCourseIdAndSem, getAllRoutinbycourse_id,getAllCourses,createCourse,getAllCoursesBYId,findScheduleByPaperCodes} = require("../controller/controllerRoutine");
 const auth = require("../../../authMiddlewares/auth");
 const {validateAddRoutine,  addOrUpdateTimeSlotValidation,deleteTimeSlotValidation, updateSlotDetailsValidation, validateRoutineParams,validateCourse} =require("../middlewares/validationRoutine");
 
@@ -22,6 +22,8 @@ router.post("/delete-time-slot",deleteTimeSlotValidation, deleteTimeSlot );
 router.post("/teacher-update-time-slot",updateSlotDetailsValidation, updateSlotDetails );
 
 router.post("/routine/:course_id/:sem",auth,validateRoutineParams, getRoutineByCourseIdAndSem );
+
+router.post("/routine-teacher", findScheduleByPaperCodes );//teacher time slot for routine
 
 router.post("/routine-all/:course_id/:sem",validateRoutineParams, getAllRoutinbycourse_id );
 

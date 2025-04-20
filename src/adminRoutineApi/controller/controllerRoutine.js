@@ -523,4 +523,79 @@ const createCourse = async (req, res) => {
     res.status(500).json({ message: "Error creating course", error: error.message });
   }
 };
-module.exports = { getAllReotines, addRoutines, deleteRoutine,addRoutinesNormal ,deleteTimeSlot ,updateSlotDetails , getRoutineByCourseIdAndSem , getAllRoutinbycourse_id,getAllCourses, createCourse,getAllCoursesBYId};
+
+const findScheduleByPaperCodes = async (req, res) => {
+  try {
+    // Get paper codes from request body
+    const { paper_codes } = req.body;
+    
+    if (!paper_codes || !Array.isArray(paper_codes) || paper_codes.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Please provide an array of paper codes" 
+      });
+    }
+
+    // Find all course routines containing these paper codes
+    // const CourseRoutine = mongoose.model("CourseRoutine");
+    const routines = await CourseRoutine.find({
+      $or: [
+        { "days.day1.paper_code": { $in: paper_codes } },
+        { "days.day2.paper_code": { $in: paper_codes } },
+        { "days.day3.paper_code": { $in: paper_codes } },
+        { "days.day4.paper_code": { $in: paper_codes } },
+        { "days.day5.paper_code": { $in: paper_codes } },
+        { "days.day6.paper_code": { $in: paper_codes } }
+      ]
+    });
+
+    if (!routines || routines.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No schedules found for the given paper codes"
+      });
+    }
+
+    // Process the results to return only the relevant information
+    const results = routines.map(routine => {
+      const result = {
+        course_id: routine.course_id,
+        course_name: routine.course_name,
+        week: routine.week,
+        sem: routine.sem,
+        date_range: routine.date_range
+      };
+
+      // Process each day to find matching paper codes
+      for (let i = 1; i <= 6; i++) {
+        const dayKey = `day${i}`;
+        if (routine.days[dayKey] && routine.days[dayKey].length > 0) {
+          // Filter slots that match the requested paper codes
+          const filteredSlots = routine.days[dayKey].filter(slot => 
+            paper_codes.includes(slot.paper_code)
+          );
+          
+          if (filteredSlots.length > 0) {
+            // Add this day to the result if it has matching slots
+            result[dayKey] = filteredSlots;
+          }
+        }
+      }
+
+      return result;
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: results
+    });
+  } catch (error) {
+    console.error("Error finding schedule by paper codes:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while retrieving schedule",
+      error: error.message
+    });
+  }
+};
+module.exports = { getAllReotines, addRoutines, deleteRoutine,addRoutinesNormal ,deleteTimeSlot ,updateSlotDetails , getRoutineByCourseIdAndSem , getAllRoutinbycourse_id,getAllCourses, createCourse,getAllCoursesBYId,findScheduleByPaperCodes};
