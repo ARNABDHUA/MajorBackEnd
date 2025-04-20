@@ -1,6 +1,8 @@
 const Teacher = require('../models/teacherModel');
 const bcrypt=require("bcrypt");
 const jwt=require("jsonwebtoken");
+const cloudinary =require("./cloudinary.js");
+const fs = require("fs");
 
 const SECRET_KEY="helloArnab";
 
@@ -153,13 +155,60 @@ const updateTeacher = async (req, res) => {
         message += 'Expertise added successfully. ';
       }
     }
-
-    // ✅ Handle image upload if file is present
-    if (req.file) {
-      updates.image = req.file.filename;
+    
+    // ✅ Handle image upload with Cloudinary if file is present
+    if (req.files && req.files.image) {
+      try {
+        if (!cloudinary || !cloudinary.uploader) {
+          throw new Error("Cloudinary configuration is missing or incorrect");
+        }
+        
+        // Extract the public_id from the existing image URL if possible
+        // This is a basic extraction and might need adjustment based on your URL structure
+        let oldPublicId = null;
+        if (teacher.image && teacher.image !== "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg") {
+          // Try to extract public_id from URL
+          const urlParts = teacher.image.split('/');
+          const filenamePart = urlParts[urlParts.length - 1];
+          const publicIdParts = filenamePart.split('.');
+          if (publicIdParts.length > 1) {
+            oldPublicId = `teachers/profile_images/${publicIdParts[0]}`;
+          }
+        }
+        
+        // Delete the old image if we could extract a public_id
+        if (oldPublicId) {
+          try {
+            await cloudinary.uploader.destroy(oldPublicId);
+          } catch (deleteError) {
+            console.log("Failed to delete old image, continuing with upload:", deleteError.message);
+            // Continue even if deletion fails
+          }
+        }
+        
+        // Upload new image to Cloudinary
+        const result = await cloudinary.uploader.upload(req.files.image.tempFilePath, {
+          folder: 'teachers/profile_images',
+          resource_type: "image",
+        });
+        
+        // Clean up the temp file
+        fs.unlinkSync(req.files.image.tempFilePath);
+        
+        // Store only the URL as per your schema
+        updates.image = result.secure_url;
+        
+        message += 'Profile image updated successfully. ';
+      } catch (imageError) {
+        console.error("Cloudinary upload error:", imageError);
+        return res.status(400).json({ 
+          message: 'Image upload failed.', 
+          error: imageError.message 
+        });
+      }
     }
 
-    // ✅ If there are updates, proceed with updating the teacher
+    // If there are no updates, don't proceed
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ message: 'No valid updates provided.' });
     }
@@ -176,11 +225,10 @@ const updateTeacher = async (req, res) => {
     });
 
   } catch (error) {
+    console.error("Update teacher error:", error);
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
 
 const updateTeacherCourseByCRoll = async (req, res) => {
@@ -253,5 +301,97 @@ const logInTeacher= async(req,res)=>{
     }
   };
 
+  const removeQualification = async (req, res) => {
+    try {
+      const { c_roll } = req.params;
+      const { degree, expertise } = req.body;
+  
+      // Validate input
+      if (!degree && !expertise) {
+        return res.status(400).json({ 
+          message: 'Either degree or expertise must be provided to remove data.' 
+        });
+      }
+  
+      // Find the teacher first
+      const teacher = await Teacher.findOne({ c_roll: c_roll });
+  
+      if (!teacher) {
+        return res.status(404).json({ message: 'Teacher not found' });
+      }
+  
+      let updateOperation = {};
+      let message = '';
+  
+      // Handle qualification removal
+      if (degree) {
+        // Check if the qualification exists
+        const qualificationExists = teacher.qualification.some(
+          (qual) => qual.degree.toLowerCase() === degree.toLowerCase()
+        );
+  
+        if (!qualificationExists) {
+          return res.status(404).json({ message: 'Qualification with this degree not found.' });
+        }
+  
+        updateOperation = {
+          $pull: { 
+            qualification: { 
+              degree: { $regex: new RegExp(`^${degree}$`, 'i') } 
+            } 
+          }
+        };
+        message = 'Qualification removed successfully!';
+      }
+  
+      // Handle expertise removal
+      if (expertise) {
+        // Check if the expertise exists
+        const expertiseExists = teacher.expertise.some(
+          (exp) => exp.toLowerCase() === expertise.toLowerCase()
+        );
+  
+        if (!expertiseExists) {
+          return res.status(404).json({ message: 'Expertise not found.' });
+        }
+  
+        updateOperation = {
+          $pull: { 
+            expertise: { $regex: new RegExp(`^${expertise}$`, 'i') } 
+          }
+        };
+        message = 'Expertise removed successfully!';
+      }
+  
+      // If both degree and expertise are provided, handle both
+      if (degree && expertise) {
+        updateOperation = {
+          $pull: { 
+            qualification: { 
+              degree: { $regex: new RegExp(`^${degree}$`, 'i') } 
+            },
+            expertise: { $regex: new RegExp(`^${expertise}$`, 'i') }
+          }
+        };
+        message = 'Qualification and expertise removed successfully!';
+      }
+  
+      const updatedTeacher = await Teacher.findOneAndUpdate(
+        { c_roll: c_roll },
+        updateOperation,
+        { new: true }
+      );
+  
+      res.status(200).json({
+        message,
+        data: updatedTeacher
+      });
+  
+    } catch (error) {
+      console.error("Error removing teacher data:", error);
+      res.status(500).json({ message: error.message });
+    }
+  };
 
-module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher};
+
+module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification};

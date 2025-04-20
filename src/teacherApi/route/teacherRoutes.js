@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher, updateTeacherCourseByCRoll,logInTeacher} = require('../controller/teacherController');
+const { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher, updateTeacherCourseByCRoll,logInTeacher,removeQualification} = require('../controller/teacherController');
 const {updateTeacherValidation}= require('../middlewares/teacherMiddleware');
 router.get("/", (req, res) => {
   res.send("Get all teachers");
@@ -19,7 +19,10 @@ router.post('/teachers', getAllTeachers);
 router.post('/teachers/:c_roll', getTeacherById);
 
 // Update Teacher
-router.post('/teachers-owndata/:c_roll',updateTeacherValidation,updateTeacher);
+router.post('/teachers-owndata/:c_roll',updateTeacher);
+
+//remove qualification
+router.post('/teachers-qualification/:c_roll',removeQualification);
 
 // Delete Teacher
 router.post('/teachers-delete/:c_roll', deleteTeacher);

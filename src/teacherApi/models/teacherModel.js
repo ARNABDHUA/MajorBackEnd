@@ -30,7 +30,8 @@ const teacherSchema = new mongoose.Schema({
     type: Number
   },
   image: {
-    type: String // Store image path or URL
+    type: String,
+    default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
   },
   teacher_course: {
     type: [String], // e.g. ['MCA-203', 'BTECH-404']
