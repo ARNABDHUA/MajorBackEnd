@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const {registerUser, chatUser,allUsers,updateUserImage,getImage}=require("../controller/userControllers");
+const {registerUser, chatUser,allUsers,updateUserImage,getImage,getImageteacher}=require("../controller/userControllers");
 const {accessChat, fetchChats, createGroupChat, renameGroup, addToGroup,removeFromGroup,updateGroupChatAdminMode,getChatById}=require("../controller/chatControllers")
 const {sendMessage,allMessages} =require("../controller/messageControllers")
 
@@ -33,6 +33,8 @@ router.get("/:chatId", allMessages);
 router.post("/userimageupload",updateUserImage);
 
 router.post("/userimageget",getImage);//from student image
+
+router.post("/teacherimageget",getImageteacher);//from teacher image
 
 router.post("/chat-group-admin-mode",updateGroupChatAdminMode);
 
