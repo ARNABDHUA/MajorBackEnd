@@ -3,7 +3,7 @@ const router = express.Router();
 const {registerUser, chatUser,allUsers,updateUserImage,getImage,getImageteacher,registerTeacher,makeUserTeacher}=require("../controller/userControllers");
 const {accessChat, fetchChats, createGroupChat, renameGroup, addToGroup,removeFromGroup,updateGroupChatAdminMode,getChatById}=require("../controller/chatControllers")
 const {teacherFileMessage}=require("../controller/imageAndPdf")
-const {sendMessage,allMessages} =require("../controller/messageControllers")
+const {sendMessage,allMessages,updateMessageForDeletion} =require("../controller/messageControllers")
 
 router.get("/", (req, res) => {
   res.send("Get all chat");
@@ -30,6 +30,8 @@ router.post("/chat-group-remove",removeFromGroup);
 router.post("/chat-messages",sendMessage);
 
 router.get("/:chatId", allMessages);
+
+router.post("/delete-message", updateMessageForDeletion);
 
 router.post("/userimageupload",updateUserImage);
 
