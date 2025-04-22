@@ -155,24 +155,45 @@ const accessChat =async (req, res) => {
   const removeFromGroup = async (req, res) => {
     const { chatId, userId } = req.body;
   
-    // check if the requester is admin
-  
-    const removed = await Chat.findByIdAndUpdate(
-      chatId,
-      {
-        $pull: { users: userId },
-      },
-      {
-        new: true,
+    try {
+      // First, get the current chat to check admin status
+      const chat = await Chat.findById(chatId);
+      
+      if (!chat) {
+        return res.status(404).json({ message: "Chat Not Found" });
       }
-    )
-      .populate("users", "-password")
-      .populate("groupAdmin", "-password");
-  
-    if (!removed) {
-     return  res.status(404).json({message:"Chat Not Found"});
-    } else {
+      
+      let updateOperation = {
+        $pull: { users: userId }
+      };
+      
+      // Check if the user being removed is the current admin
+      if (chat.groupAdmin.toString() === userId) {
+        // Find remaining users after removal
+        const remainingUsers = chat.users.filter(
+          user => user.toString() !== userId
+        );
+        
+        // If there are remaining users, assign the first one as the new admin
+        if (remainingUsers.length > 0) {
+          updateOperation.groupAdmin = remainingUsers[0];
+        }
+      }
+      
+      // Update the chat with all necessary changes
+      const removed = await Chat.findByIdAndUpdate(
+        chatId,
+        updateOperation,
+        {
+          new: true,
+        }
+      )
+        .populate("users", "-password")
+        .populate("groupAdmin", "-password");
+      
       return res.json(removed);
+    } catch (error) {
+      return res.status(400).json({ message: "Failed to remove from group", error: error.message });
     }
   };
 
