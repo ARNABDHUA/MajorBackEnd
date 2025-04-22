@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const {registerUser, chatUser,allUsers,updateUserImage,getImage,getImageteacher}=require("../controller/userControllers");
+const {registerUser, chatUser,allUsers,updateUserImage,getImage,getImageteacher,registerTeacher,makeUserTeacher}=require("../controller/userControllers");
 const {accessChat, fetchChats, createGroupChat, renameGroup, addToGroup,removeFromGroup,updateGroupChatAdminMode,getChatById}=require("../controller/chatControllers")
+const {teacherFileMessage}=require("../controller/imageAndPdf")
 const {sendMessage,allMessages} =require("../controller/messageControllers")
 
 router.get("/", (req, res) => {
@@ -40,6 +41,11 @@ router.post("/chat-group-admin-mode",updateGroupChatAdminMode);
 
 router.post("/chat-admin-mode-find",getChatById);
 
+router.post("/chat-register-teacher",registerTeacher);//new teacher register 
+
+router.post("/chat-isteacher",makeUserTeacher);// rof one time use to make isteacher===true
+
+router.post("/chat-isteacher-image",teacherFileMessage);
 
 // router.post("/student-singin",validateLogIn, singinStudents);
 

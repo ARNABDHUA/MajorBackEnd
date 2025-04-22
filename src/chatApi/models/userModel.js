@@ -14,6 +14,13 @@ const userSchema = mongoose.Schema(
         required: true,
         default: false,
       },
+      isteacher: {
+        type: Boolean,
+        default: false,
+      },
+      c_roll: {
+        type: String, default: null
+      },
     },
     { timestamps: true }
   );

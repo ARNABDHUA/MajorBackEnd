@@ -191,4 +191,55 @@ const allUsers = async (req, res) => {
     }
   };
 
-  module.exports = { registerUser,chatUser ,allUsers,updateUserImage,getImage,getImageteacher};
+  const registerTeacher = async (req, res) => {
+    const { name, email, c_roll } = req.body;
+  
+    if (!name || !email || !c_roll) {
+      res.status(400);
+      throw new Error("Please provide name, email, and c_roll");
+    }
+  
+    const userExists = await User.findOne({ email });
+  
+    if (userExists) {
+      res.status(400);
+      throw new Error("User already exists");
+    }
+  
+    const user = await User.create({
+      name,
+      email,
+      c_roll,
+      isteacher: true,
+    });
+  
+    if (user) {
+      res.status(201).json(user); // send full user object including timestamps and default values
+    } else {
+      res.status(400);
+      throw new Error("Failed to create teacher");
+    }
+  };
+  
+  const makeUserTeacher =async (req, res) => {
+    const { email } = req.body;
+  
+    if (!email) {
+      res.status(400);
+      throw new Error("Email is required");
+    }
+  
+    const user = await User.findOne({ email });
+  
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+  
+    user.isteacher = true;
+    await user.save();
+  
+    res.status(200).json(user); // return full updated user
+  };
+
+  module.exports = { registerUser,chatUser ,allUsers,updateUserImage,getImage,getImageteacher,registerTeacher,makeUserTeacher};
