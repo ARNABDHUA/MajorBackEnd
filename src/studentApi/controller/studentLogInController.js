@@ -3,6 +3,10 @@ const bcrypt=require("bcrypt");
 const jwt=require("jsonwebtoken");
 const cloudinary =require("./cloudinary.js");
 const fs = require("fs");
+const emailotpsignup=require('../models/emailsender');
+require("dotenv").config();
+
+const { sendEmailService } = require("../Service/emailService");
 
 const SECRET_KEY="helloApSfS";
 
@@ -305,5 +309,60 @@ const updateStudentProfile = async (req, res) => {
   }
 };
 
+const sendEmailController = async (req, res) => {
+  const { email } = req.body;
 
-module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile};
+  const check = await Student.findOne({ email });
+  if (!check) {
+    try {
+      let otp = await sendEmailService(email);
+      // console.log("otppppppppppppp", otp);
+  
+      const test = await emailotpsignup.findOneAndUpdate(
+        { email: email },      // filter
+        { otp: otp },          // update
+        { new: true, upsert: true } // important: upsert!
+      );
+  
+      res.status(200).json({ message: "Email sent successfully" });
+    } catch (error) {
+      console.error(error); // log the real error for debugging
+      res.status(500).json({ error: "Email sending failed" });
+    }
+  } else {
+    res.status(400).json({ message: "Email already exists !!" });
+  }
+  
+};
+
+const signupOtpValidate = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    // Find the record matching email and otp
+    const record = await emailotpsignup.findOne({ email: email, otp: otp });
+
+    if (!record) {
+      return res.status(400).json({ success: false, message: "Invalid OTP!" });
+    }
+
+    // Check if OTP is expired
+    const otpGeneratedTime = record.updatedAt;
+    const currentTime = new Date();
+    const differenceInMinutes = (currentTime - otpGeneratedTime) / (1000 * 60); // milliseconds to minutes
+
+    if (differenceInMinutes > 10) {
+      return res.status(400).json({ success: false, message: "Your OTP has expired. Please request a new one." });
+    }
+
+    // If OTP is valid and not expired
+    return res.status(200).json({ success: true, message: "OTP verified successfully!" });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Server error during OTP verification!" });
+  }
+};
+
+
+module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate};

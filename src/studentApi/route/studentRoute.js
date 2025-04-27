@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 // const studentNameRoutes = require("./studentNameRoutes");
-const {singupStudents ,singinStudents ,addStudentAcademicDetails,generateCRoll,updateStudentProfile}=require("../controller/studentLogInController");
+const {singupStudents ,singinStudents ,addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate}=require("../controller/studentLogInController");
 const { validateSignup ,validateLogIn } = require("../middlewares/validationSingup");
 const auth=require("../../../authMiddlewares/auth")
 
@@ -18,5 +18,9 @@ router.post("/student-academic", addStudentAcademicDetails);
 router.post("/student-rollgenerate", generateCRoll);
 
 router.post("/student-update", updateStudentProfile);
+
+router.post("/student-mail-otp", sendEmailController);
+
+router.post("/student-mail-otp-validate", signupOtpValidate);
 
 module.exports = router;
