@@ -311,9 +311,10 @@ const updateStudentProfile = async (req, res) => {
 
 const sendEmailController = async (req, res) => {
   const { email } = req.body;
+  let data="arnabdhua74@gmail.com"
 
   const check = await Student.findOne({ email });
-  if (!check) {
+  if (!check && email!==data) {
     try {
       let otp = await sendEmailService(email);
       // console.log("otppppppppppppp", otp);
@@ -331,6 +332,32 @@ const sendEmailController = async (req, res) => {
     }
   } else {
     res.status(400).json({ message: "Email already exists !!" });
+  }
+  
+};
+
+const sendForgetPassword = async (req, res) => {
+  const { email } = req.body;
+
+  const check = await Student.findOne({ email });
+  if (check) {
+    try {
+      let otp = await sendEmailService(email);
+      // console.log("otppppppppppppp", otp);
+  
+      const test = await emailotpsignup.findOneAndUpdate(
+        { email: email },      // filter
+        { otp: otp },          // update
+        { new: true, upsert: true } // important: upsert!
+      );
+  
+      res.status(200).json({ message: "Email sent successfully" });
+    } catch (error) {
+      console.error(error); // log the real error for debugging
+      res.status(500).json({ error: "Email sending failed" });
+    }
+  } else {
+    res.status(400).json({ message: "User not exists !!" });
   }
   
 };
@@ -365,4 +392,4 @@ const signupOtpValidate = async (req, res) => {
 };
 
 
-module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate};
+module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword};
