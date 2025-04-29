@@ -40,7 +40,7 @@ const formatTime = (date) => {
       // Format time as [hh:mm am/pm]
       const formattedTime = formatTime(istTime);
       
-      // Format date as day-month-year
+      // Format date as day-month-year for display purposes
       const formattedDate = `${istTime.getDate()}-${istTime.getMonth() + 1}-${istTime.getFullYear()}`;
       
       // Create attendance record
@@ -52,7 +52,8 @@ const formatTime = (date) => {
         course_code,
         jointime: formattedTime,
         status: 'absent',  // Default status is now 'absent'
-        date: formattedDate
+        date: istTime,     // Store the Date object, not the string
+        formatted_date: formattedDate  // Store the formatted string in a separate field
       });
       
       // Return only the attendance_id in the response
