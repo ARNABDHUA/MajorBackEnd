@@ -32,20 +32,27 @@ const formatTime = (date) => {
         });
       }
       
-      // Format current time as [hh:mm am/pm]
+      // Get current time in Indian Standard Time (Kolkata)
       const now = new Date();
-      const formattedTime = formatTime(now);
+      // Convert to IST (UTC+5:30)
+      const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+      
+      // Format time as [hh:mm am/pm]
+      const formattedTime = formatTime(istTime);
+      
+      // Format date as day-month-year
+      const formattedDate = `${istTime.getDate()}-${istTime.getMonth() + 1}-${istTime.getFullYear()}`;
       
       // Create attendance record
       const attendance = await Teacherattendance.create({
         teacher: teacher.name,
         paper_code,
-        email:teacher.email,
+        email: teacher.email,
         c_roll: teacher.c_roll,
         course_code,
         jointime: formattedTime,
         status: 'absent',  // Default status is now 'absent'
-        date: now
+        date: formattedDate
       });
       
       // Return only the attendance_id in the response
@@ -79,8 +86,13 @@ const formatTime = (date) => {
         });
       }
       
-      // Format current time as [hh:mm am/pm]
-      const formattedTime = formatTime(new Date());
+      // Get current time in Indian Standard Time (Kolkata)
+      const now = new Date();
+      // Convert to IST (UTC+5:30)
+      const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+      
+      // Format time as [hh:mm am/pm]
+      const formattedTime = formatTime(istTime);
       
       // Update exit time and status
       attendance.exittime = formattedTime;
@@ -91,7 +103,7 @@ const formatTime = (date) => {
         success: true,
         message: 'Exit time recorded successfully',
         data: {
-           attendance
+          attendance
         }
       });
     } catch (error) {
