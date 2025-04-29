@@ -42,8 +42,7 @@ const attendanceSchema = new mongoose.Schema({
     default: 'absent'  // Changed default to 'absent'
   },
   date: {
-    type: Date,
-    default: Date.now
+    type: String
   }
 }, { timestamps: true });
 

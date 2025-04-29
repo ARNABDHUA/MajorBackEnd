@@ -32,18 +32,29 @@ const formatTime = (date) => {
         });
       }
       
-      // Get current time in Indian Standard Time (Kolkata)
+      // Get current date and time in Indian Standard Time (Kolkata)
       const now = new Date();
-      // Convert to IST (UTC+5:30)
-      const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
       
-      // Format time as [hh:mm am/pm]
-      const formattedTime = formatTime(istTime);
+      // Format time as [hh:mm am/pm] using proper locale formatting for IST
+      const timeOptions = { 
+        timeZone: 'Asia/Kolkata', 
+        hour12: true,
+        hour: '2-digit', 
+        minute: '2-digit'
+      };
+      const formattedTime = now.toLocaleTimeString('en-US', timeOptions);
       
-      // Format date as day-month-year for display purposes
-      const formattedDate = `${istTime.getDate()}-${istTime.getMonth() + 1}-${istTime.getFullYear()}`;
+      // Create a date object in IST
+      const istOptions = { timeZone: 'Asia/Kolkata' };
+      const istNow = new Date(now.toLocaleString('en-US', istOptions));
       
-      // Create attendance record
+      // Format date as dd-mm-yyyy
+      const day = String(istNow.getDate()).padStart(2, '0');
+      const month = String(istNow.getMonth() + 1).padStart(2, '0'); // January is 0
+      const year = istNow.getFullYear();
+      const formattedDate = `${day}-${month}-${year}`;
+      
+      // Create attendance record with IST date
       const attendance = await Teacherattendance.create({
         teacher: teacher.name,
         paper_code,
@@ -51,16 +62,16 @@ const formatTime = (date) => {
         c_roll: teacher.c_roll,
         course_code,
         jointime: formattedTime,
-        status: 'absent',  // Default status is now 'absent'
-        date: istTime,     // Store the Date object, not the string
-        formatted_date: formattedDate  // Store the formatted string in a separate field
+        status: 'absent',  // Default status is 'absent'
+        date: formattedDate      // Store the IST Date object
       });
       
-      // Return only the attendance_id in the response
+      // Return attendance_id and formatted date in the response
       res.status(201).json({
         success: true,
         data: {
-          attendance_id: attendance.attendance_id
+          attendance_id: attendance.attendance_id,
+          date:attendance.date
         }
       });
     } catch (error) {
