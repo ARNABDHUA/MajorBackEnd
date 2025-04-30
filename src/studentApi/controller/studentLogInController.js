@@ -250,7 +250,7 @@ const generateCRoll = async (req, res) => {
 
 const updateStudentProfile = async (req, res) => {
   try {
-    const { email, address, pincode,state,city } = req.body;
+    const { email, address, pincode, state, city } = req.body;
 
     if (!email) {
       return res.status(400).json({ error: "Email is required to find student" });
@@ -264,6 +264,22 @@ const updateStudentProfile = async (req, res) => {
 
     // Upload new profile image if provided
     if (req.files && req.files.image) {
+      // Delete old image if exists
+      if (student.pic) {
+        // Extract public_id from the Cloudinary URL
+        const publicId = student.pic.split('/').slice(-2).join('/').split('.')[0];
+        if (publicId) {
+          try {
+            await cloudinary.uploader.destroy(`students/profile_images/${publicId}`);
+            console.log(`Previous image deleted: ${publicId}`);
+          } catch (deleteError) {
+            console.error("Error deleting previous image:", deleteError);
+            // Continue with the update even if delete fails
+          }
+        }
+      }
+
+      // Upload new image
       const imageResult = await cloudinary.uploader.upload(
         req.files.image.tempFilePath,
         {

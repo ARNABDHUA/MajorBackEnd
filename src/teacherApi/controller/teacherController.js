@@ -101,7 +101,7 @@ const updateTeacher = async (req, res) => {
     const { phoneNumber, degree, institution, year, expertise } = req.body;
     const { c_roll } = req.params;
 
-    // ✅ Find the teacher first
+    // Find the teacher first
     const teacher = await Teacher.findOne({ c_roll: c_roll });
 
     if (!teacher) {
@@ -111,10 +111,10 @@ const updateTeacher = async (req, res) => {
     const updates = {};
     let message = ''; // Store any messages to send back
 
-    // ✅ Optional fields to update
+    // Optional fields to update
     if (phoneNumber) updates.phoneNumber = phoneNumber;
 
-    // ✅ Qualification handling
+    // Qualification handling
     if (degree || institution || year) {
       const newQualification = {
         ...(degree && { degree }),
@@ -139,7 +139,7 @@ const updateTeacher = async (req, res) => {
       }
     }
 
-    // ✅ Expertise handling (assuming it's an array now)
+    // Expertise handling (assuming it's an array now)
     if (expertise) {
       const existingExpertise = teacher.expertise || [];
 
@@ -156,7 +156,7 @@ const updateTeacher = async (req, res) => {
       }
     }
     
-    // ✅ Handle image upload with Cloudinary if file is present
+    // Handle image upload with Cloudinary if file is present
     if (req.files && req.files.image) {
       try {
         if (!cloudinary || !cloudinary.uploader) {
