@@ -10,10 +10,10 @@ const createPaper = async (req, res) => {
   try {
     const {
       paper_code,
-      course_id,
+      course_code,
       topic_name,
       paper_name,
-      semester,
+      sem,
       teacher_name,
       teacher_id,
     } = req.body;
@@ -51,12 +51,12 @@ const createPaper = async (req, res) => {
     // Create new paper document
     const paper = new Paper({
       paper_code,
-      course_id,
+      course_code,
       topic_name,
       image: imageResult.secure_url,
       video: videoResult.secure_url,
       paper_name,
-      semester,
+      sem,
       teacher_name,
       teacher_id,
     });
