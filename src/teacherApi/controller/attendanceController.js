@@ -1,14 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const Teacher = require('../models/teacherModel');
 const Teacherattendance=require('../models/attendance');
-
-const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      hour12: true 
-    });
-  };
   
   // Modified recordAttendance function
   const recordAttendance = async (req, res) => {
@@ -54,24 +46,37 @@ const formatTime = (date) => {
       const year = istNow.getFullYear();
       const formattedDate = `${day}-${month}-${year}`;
       
-      // Create attendance record with IST date
-      const attendance = await Teacherattendance.create({
-        teacher: teacher.name,
+      // Check if attendance record already exists for this teacher, paper_code and date
+      let attendance = await Teacherattendance.findOne({
+        c_roll,
         paper_code,
-        email: teacher.email,
-        c_roll: teacher.c_roll,
-        course_code,
-        jointime: formattedTime,
-        status: 'absent',  // Default status is 'absent'
-        date: formattedDate      // Store the IST Date object
+        date: formattedDate
       });
+      
+      // If attendance record exists, update the jointime
+      if (attendance) {
+        attendance.jointime = formattedTime;
+        await attendance.save();
+      } else {
+        // Create new attendance record with IST date
+        attendance = await Teacherattendance.create({
+          teacher: teacher.name,
+          paper_code,
+          email: teacher.email,
+          c_roll: teacher.c_roll,
+          course_code,
+          jointime: formattedTime,
+          status: 'absent',  // Default status is 'absent'
+          date: formattedDate      // Store the IST Date object
+        });
+      }
       
       // Return attendance_id and formatted date in the response
       res.status(201).json({
         success: true,
         data: {
           attendance_id: attendance.attendance_id,
-          date:attendance.date
+          date: attendance.date
         }
       });
     } catch (error) {
@@ -100,11 +105,15 @@ const formatTime = (date) => {
       
       // Get current time in Indian Standard Time (Kolkata)
       const now = new Date();
-      // Convert to IST (UTC+5:30)
-      const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
       
-      // Format time as [hh:mm am/pm]
-      const formattedTime = formatTime(istTime);
+      // Format time as [hh:mm am/pm] using proper locale formatting for IST
+      const timeOptions = { 
+        timeZone: 'Asia/Kolkata', 
+        hour12: true,
+        hour: '2-digit', 
+        minute: '2-digit'
+      };
+      const formattedTime = now.toLocaleTimeString('en-US', timeOptions);
       
       // Update exit time and status
       attendance.exittime = formattedTime;
