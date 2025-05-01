@@ -1,4 +1,5 @@
 const Student=require("../models/studentLogInModels");
+const CoursePaper= require('../../adminRoutineApi/models/paperCodeModel');
 const bcrypt=require("bcrypt");
 const jwt=require("jsonwebtoken");
 const cloudinary =require("./cloudinary.js");
@@ -90,6 +91,8 @@ const singinStudents = async (req, res) => {
       course_code,
       pic,
       payment,
+      sem,
+      paper_code,
     } = existingUser;
 
     res.status(201).json({
@@ -107,6 +110,8 @@ const singinStudents = async (req, res) => {
         course_code,
         pic,
         payment,
+        sem,
+      paper_code
       },
       token,
     });
@@ -186,6 +191,16 @@ const generateCRoll = async (req, res) => {
 
     // If c_roll already exists
     if (student.c_roll) {
+          // Find the course paper record
+          const coursePaper = await CoursePaper.findOne({ 
+            course_code: course_code, 
+            sem :"1"
+          });
+          const paperCodes = coursePaper.papers.map(paper => paper.paper_code);
+      student.paper_code=paperCodes;
+      student.sem="1";
+      student.course_code=course_code;
+      await student.save();
       return res.status(200).json({
         name: student.name,
         email: student.email,
@@ -199,6 +214,8 @@ const generateCRoll = async (req, res) => {
         gender: student.gender,
         course_code: student.course_code,
         pic: student.pic,
+        sem:student.sem,
+        paper_code:student.paper_code,
         payment: student.payment
       });
     }
@@ -220,9 +237,18 @@ const generateCRoll = async (req, res) => {
     const paddedRoll = String(newRollNumber).padStart(4, '0');
     const c_roll = `${rollPrefix}${paddedRoll}`;
 
+      // Find the course paper record
+      const coursePaper = await CoursePaper.findOne({ 
+        course_code: course_code, 
+        sem :"1"
+      });
+      const paperCodes = coursePaper.papers.map(paper => paper.paper_code);
+
+    student.paper_code=paperCodes;
+    student.sem="1";
     student.payment= true;
     student.c_roll = c_roll;
-    student.course_code = course_code; // optionally update course_code
+    student.course_code = course_code; 
     await student.save();
 
     res.status(200).json({
@@ -238,7 +264,9 @@ const generateCRoll = async (req, res) => {
       gender: student.gender,
       course_code: student.course_code,
       pic: student.pic,
-      payment: student.payment
+      payment: student.payment,
+      sem:student.sem,
+      paper_code:student.paper_code
     });
 
   } catch (error) {
@@ -264,32 +292,53 @@ const updateStudentProfile = async (req, res) => {
 
     // Upload new profile image if provided
     if (req.files && req.files.image) {
-      // Delete old image if exists
-      if (student.pic) {
-        // Extract public_id from the Cloudinary URL
-        const publicId = student.pic.split('/').slice(-2).join('/').split('.')[0];
-        if (publicId) {
-          try {
-            await cloudinary.uploader.destroy(`students/profile_images/${publicId}`);
-            console.log(`Previous image deleted: ${publicId}`);
-          } catch (deleteError) {
-            console.error("Error deleting previous image:", deleteError);
-            // Continue with the update even if delete fails
+      try {
+        if (!cloudinary || !cloudinary.uploader) {
+          throw new Error("Cloudinary configuration is missing or incorrect");
+        }
+        let message = '';
+        // Extract the public_id from the existing image URL if possible
+        let oldPublicId = null;
+        if (student.pic && student.pic !== "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg") {
+          // Try to extract public_id from URL
+          const urlParts = student.pic.split('/');
+          const filenamePart = urlParts[urlParts.length - 1];
+          const publicIdParts = filenamePart.split('.');
+          if (publicIdParts.length > 1) {
+            oldPublicId = `students/profile_images/${publicIdParts[0]}`;
           }
         }
-      }
-
-      // Upload new image
-      const imageResult = await cloudinary.uploader.upload(
-        req.files.image.tempFilePath,
-        {
-          folder: "students/profile_images",
-          resource_type: "image",
+        
+        // Delete the old image if we could extract a public_id
+        if (oldPublicId) {
+          try {
+            await cloudinary.uploader.destroy(oldPublicId);
+          } catch (deleteError) {
+            console.log("Failed to delete old image, continuing with upload:", deleteError.message);
+            // Continue even if deletion fails
+          }
         }
-      );
-
-      fs.unlinkSync(req.files.image.tempFilePath);
-      student.pic = imageResult.secure_url;
+        
+        // Upload new image to Cloudinary
+        const result = await cloudinary.uploader.upload(req.files.image.tempFilePath, {
+          folder: 'students/profile_images',
+          resource_type: "image",
+        });
+        
+        // Clean up the temp file
+        fs.unlinkSync(req.files.image.tempFilePath);
+        
+        // Store only the URL as per your schema
+        student.pic = result.secure_url;
+        
+        message += 'Profile image updated successfully. ';
+      } catch (imageError) {
+        console.error("Cloudinary upload error:", imageError);
+        return res.status(400).json({ 
+          message: 'Image upload failed.', 
+          error: imageError.message 
+        });
+      }
     }
 
     // Update other fields if provided

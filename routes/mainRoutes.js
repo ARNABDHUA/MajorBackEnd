@@ -5,10 +5,12 @@ const teacherRoutes = require("../src/teacherApi/route/teacherRoutes");
 const adminRoutineApi = require("../src/adminRoutineApi/routes/adminRoutineApi");
 const chatApi =require("../src/chatApi/route/routerChat")
 const videoApi=require("../src/videoApi/route/videoRoute")
+const paper_code=require('../src/adminRoutineApi/routes/paperCodeRoute')
 
 router.use("/students", studentRoutes);
 router.use("/teachers", teacherRoutes);
 router.use("/adminroutine", adminRoutineApi);
+router.use("/paper-code", paper_code);
 router.use("/chat", chatApi);
 router.use("/video", videoApi);
 

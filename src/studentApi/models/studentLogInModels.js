@@ -14,6 +14,14 @@ const studentSchema = new mongoose.Schema({
   c_roll: { type: String, default: null },
   e_roll: { type: String, default: null },
   course_code: { type: String, default: null },
+  paper_code: {
+    type: [String], 
+    default: []
+  },
+  sem:{
+    type:String,
+    default: "1"
+  },
   tenth_marks: { type: Number, default: null },
   tenth_year: { type: Number, default: null },
   twelfth_marks: { type: Number, default: null },
