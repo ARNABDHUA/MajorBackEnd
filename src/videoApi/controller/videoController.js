@@ -70,4 +70,59 @@ const createPaper = async (req, res) => {
   }
 };
 
-module.exports = {createPaper };
+const showAllBaseOnPaperCode = async (req, res) => {
+  try {
+    const { course_code, paper_code } = req.body;
+    
+    // Validate required parameters
+    if (!course_code || !paper_code) {
+      return res.status(400).json({
+        success: false,
+        message: 'Both course_code and paper_code are required parameters'
+      });
+    }
+
+    // Find all paper documents that match the criteria
+    const papers = await Paper.find({
+      course_code: course_code,
+      paper_code: paper_code
+    });
+
+    // Check if papers were found
+    if (!papers || papers.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No papers found with the provided course and paper codes'
+      });
+    }
+
+    // Map through papers to format each one with required fields
+    const formattedPapers = papers.map(paper => ({
+      paper_code: paper.paper_code,
+      course_code: paper.course_code,
+      topic_name: paper.topic_name,
+      image: paper.image,
+      video: paper.video,
+      paper_name: paper.paper_name,
+      sem: paper.sem,
+      teacher_name: paper.teacher_name,
+      teacher_id: paper.teacher_id
+    }));
+
+    // Return all matching papers
+    return res.status(200).json({
+      success: true,
+      count: papers.length,
+      data: formattedPapers
+    });
+  } catch (error) {
+    console.error('Error finding papers:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while retrieving paper data',
+      error: error.message
+    });
+  }
+};
+
+module.exports = {createPaper ,showAllBaseOnPaperCode};
