@@ -270,6 +270,7 @@ const updateSlotDetails = async (req, res) => {
     const { course_id, sem, day, paper_code, is_live, topic, image } = req.body;
 
     const dayToWeekdayMap = {
+      "Day 0":"Sunday",
       "Day 1": "Monday",
       "Day 2": "Tuesday",
       "Day 3": "Wednesday",
@@ -280,7 +281,7 @@ const updateSlotDetails = async (req, res) => {
 
     // Validate the day input
     if (!dayToWeekdayMap.hasOwnProperty(day)) {
-      return res.status(400).json({ message: "Invalid day provided. Use Day 1 to Day 6." });
+      return res.status(400).json({ message: "Invalid day provided. Use Day 0 to Day 6." });
     }
 
     // Check if today matches the given day

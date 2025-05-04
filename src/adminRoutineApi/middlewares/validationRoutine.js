@@ -146,7 +146,7 @@ const deleteTimeSlotValidation = [
   
     body('day')
       .notEmpty().withMessage('day is required')
-      .matches(/^Day\s[1-6]$/).withMessage('day must be in format "Day 1" to "Day 6"'),
+      .matches(/^Day\s[0-6]$/).withMessage('day must be in format "Day 0" to "Day 6"'),
   
     body('paper_code')
       .notEmpty().withMessage('paper_code is required')

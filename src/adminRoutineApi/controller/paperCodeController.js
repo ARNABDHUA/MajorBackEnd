@@ -58,10 +58,10 @@ const CoursePaper = require('../models/paperCodeModel');
 
  const getCoursePaper = async (req, res) => {
     try {
-      const { course_id, sem } = req.params;
+      const { course_code, sem } = req.body;
       
       const coursePaper = await CoursePaper.findOne({ 
-        course_id: Number(course_id), 
+        course_code: (course_code), 
         sem 
       });
       
@@ -88,7 +88,7 @@ const CoursePaper = require('../models/paperCodeModel');
 
  const getPaperByCode = async (req, res) => {
     try {
-      const { paper_code } = req.params;
+      const { paper_code } = req.body;
       
       const coursePaper = await CoursePaper.findOne({
         'papers.paper_code': paper_code
@@ -107,7 +107,7 @@ const CoursePaper = require('../models/paperCodeModel');
       res.status(200).json({
         success: true,
         data: {
-          course_id: coursePaper.course_id,
+          course_code: coursePaper.course_code,
           sem: coursePaper.sem,
           paper_details: paper
         }
@@ -125,11 +125,10 @@ const CoursePaper = require('../models/paperCodeModel');
   
  const updateCoursePaper = async (req, res) => {
     try {
-      const { course_id, sem } = req.params;
-      const { papers } = req.body;
+      const { course_code,papers } = req.body;
       
       const coursePaper = await CoursePaper.findOne({ 
-        course_id: Number(course_id), 
+        course_code: (course_code), 
         sem 
       });
       
@@ -164,8 +163,7 @@ const CoursePaper = require('../models/paperCodeModel');
   
  const addPaper = async (req, res) => {
     try {
-      const { course_id, sem } = req.params;
-      const { paper_code, paper_name } = req.body;
+      const { paper_code, paper_name ,course_code, sem} = req.body;
       
       if (!paper_code || !paper_name) {
         return res.status(400).json({
@@ -175,7 +173,7 @@ const CoursePaper = require('../models/paperCodeModel');
       }
       
       const coursePaper = await CoursePaper.findOne({ 
-        course_id: Number(course_id), 
+        course_code: (course_code), 
         sem 
       });
       
@@ -217,11 +215,10 @@ const CoursePaper = require('../models/paperCodeModel');
   
  const updatePaper = async (req, res) => {
     try {
-      const { course_id, sem, paper_code } = req.params;
-      const { paper_name, new_paper_code } = req.body;
+      const { paper_name, new_paper_code ,course_code, sem, paper_code} = req.body;
       
       const coursePaper = await CoursePaper.findOne({ 
-        course_id: Number(course_id), 
+        course_code: Number(course_code), 
         sem 
       });
       
@@ -277,10 +274,10 @@ const CoursePaper = require('../models/paperCodeModel');
   
  const removePaper = async (req, res) => {
     try {
-      const { course_id, sem, paper_code } = req.params;
+      const { course_code, sem, paper_code } = req.body;
       
       const coursePaper = await CoursePaper.findOne({ 
-        course_id: Number(course_id), 
+        course_code:(course_code), 
         sem 
       });
       
@@ -322,10 +319,10 @@ const CoursePaper = require('../models/paperCodeModel');
 
  const deleteCoursePaper = async (req, res) => {
     try {
-      const { course_id, sem } = req.params;
+      const { course_code, sem } = req.body;
       
       const result = await CoursePaper.findOneAndDelete({ 
-        course_id: Number(course_id), 
+        course_code:(course_code), 
         sem 
       });
       
