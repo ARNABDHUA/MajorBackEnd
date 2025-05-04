@@ -8,9 +8,8 @@ const addMarksStudent = async (req, res) => {
       marks,
       quiz_id,
       email,
-      course_code,
-      paper_code,
-      quiz_title
+      course_code
+      
     } = req.body;
     
     try {
@@ -55,9 +54,9 @@ const addMarksStudent = async (req, res) => {
         quiz_id,
         email,
         course_code,
-        paper_code,
         date: currentIST, 
-        quiz_title
+        paper_code:quizData.paper_code,
+      quiz_title:quizData.quiz_title
       });
       
       // Check if this student already submitted marks for this quiz
@@ -112,13 +111,13 @@ const addMarksStudent = async (req, res) => {
       });
       
       if (existingSubmission) {
-        return res.status(403).json ({
+        return res.status(200).json ({
           hasSubmitted: true,
           submissionData: existingSubmission,
           message: "Student has already submitted marks for this quiz"
         });
       } else {
-        return res.status(403).json ({
+        return res.status(200).json ({
           hasSubmitted: false,
           submissionData: null,
           message: "No previous submission found"
