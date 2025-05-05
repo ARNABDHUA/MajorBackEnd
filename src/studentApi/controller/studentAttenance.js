@@ -3,7 +3,7 @@ const Student = require('../models/studentLogInModels');
 const Studentattendance=require('../models/studentAttendance');
 const Teacherattendance=require('../../teacherApi/models/attendance');
   
-  // Modified recordAttendance function
+  
   const recordAttendance = async (req, res) => {
     try {
       const { c_roll, paper_code, course_code } = req.body;

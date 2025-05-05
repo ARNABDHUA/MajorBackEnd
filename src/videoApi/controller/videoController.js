@@ -106,7 +106,8 @@ const showAllBaseOnPaperCode = async (req, res) => {
       paper_name: paper.paper_name,
       sem: paper.sem,
       teacher_name: paper.teacher_name,
-      teacher_id: paper.teacher_id
+      teacher_id: paper.teacher_id,
+      createdAt:paper.createdAt
     }));
 
     // Return all matching papers

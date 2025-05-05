@@ -93,6 +93,7 @@ const singinStudents = async (req, res) => {
       payment,
       sem,
       paper_code,
+      admit
     } = existingUser;
 
     res.status(201).json({
@@ -111,7 +112,8 @@ const singinStudents = async (req, res) => {
         pic,
         payment,
         sem,
-      paper_code
+      paper_code,
+      admit
       },
       token,
     });

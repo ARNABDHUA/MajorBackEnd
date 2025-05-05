@@ -36,6 +36,7 @@ const studentSchema = new mongoose.Schema({
   other_course_end: { type: String, default: null },
   rank:{ type: Number, default: null },
   payment:{type:Boolean,default:false},
+  admit:{type:Boolean,default:false},
   pic: {
     type: String,
     default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
