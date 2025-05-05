@@ -87,7 +87,7 @@
 
   const showQuestion= async(req,res)=>{
     
-    const {quiz_id,questionId}=req.body
+    const {quiz_id}=req.body
     try {
       const quiz = await Quiz.findOne({ quiz_id: quiz_id });
       
@@ -101,4 +101,21 @@
 
   }
 
-  module.exports={createID,addQuestions,deleteQuizId,deleteQuestion,showQuestion}
+  const showAllQuiz= async(req,res)=>{
+    
+    const {c_roll}=req.body
+    try {
+      const quiz = await Quiz.find({ c_roll: c_roll });
+      
+      if (!quiz) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      res.status(200).json(quiz);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+
+  }
+
+
+  module.exports={createID,addQuestions,deleteQuizId,deleteQuestion,showQuestion,showAllQuiz}
