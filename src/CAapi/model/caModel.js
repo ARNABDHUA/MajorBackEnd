@@ -12,6 +12,12 @@ const assessmentSchema = new Schema({
     required: true,
     trim: true
   },
+  course_code: {
+    type: String,
+    required: true,
+    trim: true
+  },
+
   ca1_marks: {
     type: String,
     default: ''
@@ -93,15 +99,6 @@ ca4:{
     type:Boolean,
     default:false
 },
-status:{
-    type:Boolean,
-    default:false
-},
-  course_code: {
-    type: String,
-    required: true,
-    trim: true
-  },
   sem:{
     type: String,
     default:"1"
