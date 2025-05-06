@@ -135,6 +135,43 @@ const Teacherattendance=require('../models/attendance');
       });
     }
   };
+
+  const getAttendanceByPaperAndRoll = async (req, res) => {
+    try {
+      const { paper_code, c_roll } = req.body;
+
+      if (!paper_code || !c_roll) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Both paper_code and c_roll are required' 
+        });
+      }
+      const attendanceRecords = await Teacherattendance.find({
+        paper_code: paper_code,
+        c_roll: c_roll
+      }).sort({ date: -1}); // Sort by date most recent first
+      
+      if (!attendanceRecords || attendanceRecords.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'No attendance records found for the given paper code and roll number'
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        count: attendanceRecords.length,
+        data: attendanceRecords
+      });
+      
+    } catch (error) {
+      console.error('Error fetching attendance records:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Server error while fetching attendance records',
+        error: error.message
+      });
+    }
+  };
   
 
-  module.exports = {recordAttendance,updateExitTime}
+  module.exports = {recordAttendance,updateExitTime,getAttendanceByPaperAndRoll}

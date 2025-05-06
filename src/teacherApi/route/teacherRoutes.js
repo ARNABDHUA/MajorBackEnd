@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher, updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode} = require('../controller/teacherController');
 const {updateTeacherValidation}= require('../middlewares/teacherMiddleware');
-const {recordAttendance,updateExitTime}=require('../controller/attendanceController')
+const {recordAttendance,updateExitTime,getAttendanceByPaperAndRoll}=require('../controller/attendanceController')
 router.get("/", (req, res) => {
   res.send("Get all teachers");
 });
@@ -36,6 +36,8 @@ router.post('/teachers-login', logInTeacher);
 router.post('/teachers-attendance-start', recordAttendance);
 
 router.post('/teachers-attendance-end', updateExitTime);
+
+router.post('/teachers-all-attendance', getAttendanceByPaperAndRoll);
 
 
 
