@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher, updateTeacherCourseByCRoll,logInTeacher,removeQualification} = require('../controller/teacherController');
+const { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher, updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode} = require('../controller/teacherController');
 const {updateTeacherValidation}= require('../middlewares/teacherMiddleware');
 const {recordAttendance,updateExitTime}=require('../controller/attendanceController')
 router.get("/", (req, res) => {
@@ -11,7 +11,9 @@ router.get("/", (req, res) => {
 router.post('/teachers-create',createTeacher);
 
 // update course
-router.post('/teachers-courseupdate/:c_roll',updateTeacherCourseByCRoll);
+router.post('/teachers-courseupdate/:c_roll',updateTeacherCourseByCRoll);// hod
+
+router.post('/teacher-coursecode-update', updateTeacherCourseCode);// admin
 
 // Get All Teachers
 router.post('/teachers', getAllTeachers);
@@ -34,5 +36,7 @@ router.post('/teachers-login', logInTeacher);
 router.post('/teachers-attendance-start', recordAttendance);
 
 router.post('/teachers-attendance-end', updateExitTime);
+
+
 
 module.exports = router;

@@ -393,5 +393,52 @@ const logInTeacher= async(req,res)=>{
     }
   };
 
+  const updateTeacherCourseCode = async (req, res) => {
+    try {
+      const { c_roll, courseCodes } = req.body;
+      
+      // Validate inputs
+      if (!c_roll) {
+        return res.status(400).json({ success: false, message: 'Teacher c_roll is required' });
+      }
+      
+      if (!courseCodes || !Array.isArray(courseCodes)) {
+        return res.status(400).json({ success: false, message: 'courseCodes must be an array' });
+      }
+      const teacher = await Teacher.findOne({ c_roll });
+      
+      if (!teacher) {
+        return res.status(404).json({ success: false, message: `Teacher with c_roll ${c_roll} not found` });
+      }
 
-module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification};
+    
+        // teacher.course_code = courseCodes;
+       
+        // Add new course codes while avoiding duplicates
+        courseCodes.forEach(code => {
+          if (!teacher.course_code.includes(code)) {
+            teacher.course_code.push(code);
+          }
+        });
+    
+      const updatedTeacher = await teacher.save();
+      return res.status(200).json({
+        success: true,
+        message: 'Teacher course codes updated successfully',
+        data: updatedTeacher
+      });
+      
+    } catch (error) {
+      console.error('Error updating teacher course codes:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to update teacher course codes',
+        error: error.message
+      });
+    }
+  };
+  
+
+
+
+module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode};

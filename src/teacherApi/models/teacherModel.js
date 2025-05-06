@@ -37,6 +37,14 @@ const teacherSchema = new mongoose.Schema({
     type: [String], // e.g. ['MCA-203', 'BTECH-404']
     default: []
   },
+  course_code: {
+    type: [String], //e.g ['101','102']
+    default: []
+  },
+  hod:{
+     type:Boolean,
+     default:false
+  },
   qualification: {
     type: [
       {
