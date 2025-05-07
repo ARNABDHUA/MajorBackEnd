@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const {registerUser, chatUser,allUsers,updateUserImage,getImage,getImageteacher,registerTeacher,makeUserTeacher}=require("../controller/userControllers");
+const {registerUser, chatUser,allUsers,updateUserImage,getImage,getImageteacher,registerTeacher,makeUserTeacher,makeUserStudent,allUsersForStudent,allUsersForNonStudent}=require("../controller/userControllers");
 const {accessChat, fetchChats, createGroupChat, renameGroup, addToGroup,removeFromGroup,updateGroupChatAdminMode,getChatById}=require("../controller/chatControllers")
 const {teacherFileMessage}=require("../controller/imageAndPdf")
 const {sendMessage,allMessages,updateMessageForDeletion} =require("../controller/messageControllers")
@@ -14,6 +14,10 @@ router.post("/chat-user-add",registerUser);
 router.post("/chat-user-data",chatUser);
 
 router.post("/chat-user-all",allUsers);
+
+router.post("/chat-user-all-forstudent",allUsersForStudent);//use in student for search teacher and admin
+
+router.post("/chat-user-all-forteacher",allUsersForNonStudent);//use in teacher and admin
 
 router.post("/chat-create",accessChat);
 
@@ -45,7 +49,9 @@ router.post("/chat-admin-mode-find",getChatById);
 
 router.post("/chat-register-teacher",registerTeacher);//new teacher register 
 
-router.post("/chat-isteacher",makeUserTeacher);// rof one time use to make isteacher===true
+router.post("/chat-isteacher",makeUserTeacher);// for one time use to make isteacher===true
+
+router.post("/chat-isstudent",makeUserStudent);// for one time use to make isstudent===true
 
 router.post("/chat-isteacher-image",teacherFileMessage);
 

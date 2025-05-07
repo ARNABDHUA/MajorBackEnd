@@ -18,6 +18,14 @@ const userSchema = mongoose.Schema(
         type: Boolean,
         default: false,
       },
+      isstudent: {
+        type: Boolean,
+        default: false,
+      },
+      isvalide: {
+        type: Boolean,
+        default: false,
+      },
       c_roll: {
         type: String, default: null
       },

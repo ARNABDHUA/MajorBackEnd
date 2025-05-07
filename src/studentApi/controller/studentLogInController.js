@@ -1,5 +1,6 @@
 const Student=require("../models/studentLogInModels");
 const CoursePaper= require('../../adminRoutineApi/models/paperCodeModel');
+const User = require("../../chatApi/models/userModel");
 const bcrypt=require("bcrypt");
 const jwt=require("jsonwebtoken");
 const cloudinary =require("./cloudinary.js");
@@ -252,6 +253,12 @@ const generateCRoll = async (req, res) => {
     student.c_roll = c_roll;
     student.course_code = course_code; 
     await student.save();
+
+    const user = await User.findOne({ email });//add for chat user
+    user.isteacher = true;
+    user.isstudent=true;
+    user.isvalide=true;
+    await user.save();
 
     res.status(200).json({
       name: student.name,

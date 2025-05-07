@@ -192,25 +192,24 @@ const allUsers = async (req, res) => {
   };
 
   const registerTeacher = async (req, res) => {
-    const { name, email, c_roll } = req.body;
+    const { name, email } = req.body;
   
-    if (!name || !email || !c_roll) {
-      res.status(400);
-      throw new Error("Please provide name, email, and c_roll");
+    if (!name || !email ) {
+      res.status(400).json({message:"Please provide name and  email"});
     }
   
     const userExists = await User.findOne({ email });
   
     if (userExists) {
-      res.status(400);
-      throw new Error("User already exists");
+      res.status(400).json({message:"email already exists"});
     }
   
     const user = await User.create({
       name,
       email,
-      c_roll,
+      isvalide:true,
       isteacher: true,
+      isAdmin:true
     });
   
     if (user) {
@@ -237,9 +236,67 @@ const allUsers = async (req, res) => {
     }
   
     user.isteacher = true;
+    user.isAdmin=true;
+    user.isvalide=true;
     await user.save();
   
     res.status(200).json(user); // return full updated user
   };
 
-  module.exports = { registerUser,chatUser ,allUsers,updateUserImage,getImage,getImageteacher,registerTeacher,makeUserTeacher};
+  const makeUserStudent =async (req, res) => {
+    const { email } = req.body;
+  
+    if (!email) {
+      res.status(400).json({message:"Email is required"});
+    }
+  
+    const user = await User.findOne({ email });
+  
+    if (!user) {
+      res.status(404).json({message:"User not found"});
+    }
+  
+    user.isteacher = true;
+    user.isstudent=true;
+    user.isvalide=true;
+    await user.save();
+  
+    res.status(200).json(user); // return full updated user
+  };
+
+  const allUsersForStudent = async (req, res) => {
+    const { useId } = req.body;
+    
+    const keyword = req.query.search
+    ? {
+        $or: [
+          { name: { $regex: req.query.search, $options: "i" } },
+          { email: { $regex: req.query.search, $options: "i" } },
+        ],
+        isvalide: true,
+        isAdmin: true
+      }
+    : { isvalide: true, isAdmin: true };
+
+  const users = await User.find(keyword).find({ _id: { $ne: useId } });
+  res.send(users);
+};
+
+const allUsersForNonStudent = async (req, res) => {
+  const { useId } = req.body;
+  
+  const keyword = req.query.search
+  ? {
+      $or: [
+        { name: { $regex: req.query.search, $options: "i" } },
+        { email: { $regex: req.query.search, $options: "i" } },
+      ],
+      isvalide: true
+    }
+  : { isvalide: true};
+
+const users = await User.find(keyword).find({ _id: { $ne: useId } });
+res.send(users);
+};
+
+  module.exports = { registerUser,chatUser ,allUsers,updateUserImage,getImage,getImageteacher,registerTeacher,makeUserTeacher,makeUserStudent,allUsersForStudent,allUsersForNonStudent};
