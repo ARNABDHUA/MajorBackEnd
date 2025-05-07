@@ -70,10 +70,6 @@ const addOrUpdateTimeSlotValidation = [
     .exists().withMessage("course_id is required")
     .isNumeric().withMessage("course_id must be a number"),
 
-  body("course_name")
-    .exists().withMessage("course_name is required")
-    .isString().withMessage("course_name must be a string"),
-
   body("sem")
     .exists().withMessage("sem is required")
     .isString().withMessage("sem must be a string"),

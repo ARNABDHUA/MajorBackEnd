@@ -59,7 +59,6 @@ const addRoutinesNormal = async (req, res) => {
   try {
     const {
       course_id,
-      course_name,
       sem,
       day,
       time,
@@ -67,14 +66,13 @@ const addRoutinesNormal = async (req, res) => {
       paper_code
     } = req.body;
 
-    if (!course_id || !course_name || !sem || !day || !time || !paper || !paper_code) {
+    if (!course_id || !sem || !day || !time || !paper || !paper_code) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
     const dayKey = day.toLowerCase().replace(" ", "");
     let courseRoutine = await CourseRoutine.findOne({
       course_id,
-      course_name,
       sem
     });
 
@@ -99,7 +97,6 @@ const addRoutinesNormal = async (req, res) => {
       const newTimeSlot = { time, paper, paper_code };
       const newCourseRoutine = new CourseRoutine({
         course_id,
-        course_name,
         sem,
         days: {
           day1: [],

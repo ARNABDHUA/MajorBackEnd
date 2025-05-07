@@ -12,7 +12,6 @@ const TimeSlotSchema = {
 
 const CourseRoutineSchema = new mongoose.Schema({
   course_id: { type: Number, required: true },
-  course_name:{ type: String, required: true },
   week:{type: String,default: null },
   date_range:{type: String,default: null },
   sem:{ type: String, required: true },
