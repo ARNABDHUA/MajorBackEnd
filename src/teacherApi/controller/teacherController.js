@@ -82,6 +82,17 @@ const getAllTeachers = async (req, res) => {
   }
 };
 
+// Get All Teachers by course_code
+const getAllTeachersByCourseCode = async (req, res) => {
+  const{course_code}=req.body
+  try {
+    const teachers = await Teacher.find({course_code});
+    res.status(200).json(teachers);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Get Single Teacher
 const getTeacherById = async (req, res) => {
   try {
@@ -474,4 +485,4 @@ const makeTeacherHOD = async (req, res) => {
 };
 
 
-module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD};
+module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode};
