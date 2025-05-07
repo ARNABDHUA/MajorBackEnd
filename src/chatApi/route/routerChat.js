@@ -13,11 +13,11 @@ router.post("/chat-user-add",registerUser);
 
 router.post("/chat-user-data",chatUser);
 
-router.post("/chat-user-all",allUsers);
+router.post("/chat-user-all",allUsersForNonStudent);//use in teacher and admin
 
 router.post("/chat-user-all-forstudent",allUsersForStudent);//use in student for search teacher and admin
 
-router.post("/chat-user-all-forteacher",allUsersForNonStudent);//use in teacher and admin
+// router.post("/chat-user-all-forteacher",allUsersForNonStudent);//use in teacher and admin
 
 router.post("/chat-create",accessChat);
 

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher, updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode} = require('../controller/teacherController');
+const { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher, updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD} = require('../controller/teacherController');
 const {updateTeacherValidation}= require('../middlewares/teacherMiddleware');
 const {recordAttendance,updateExitTime,getAttendanceByPaperAndRoll}=require('../controller/attendanceController')
 router.get("/", (req, res) => {
@@ -39,6 +39,6 @@ router.post('/teachers-attendance-end', updateExitTime);
 
 router.post('/teachers-all-attendance', getAttendanceByPaperAndRoll);
 
-
+router.post('/teachers-hod', makeTeacherHOD);
 
 module.exports = router;

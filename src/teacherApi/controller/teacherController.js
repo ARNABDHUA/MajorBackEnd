@@ -439,6 +439,39 @@ const logInTeacher= async(req,res)=>{
   };
   
 
+const makeTeacherHOD = async (req, res) => {
+  try {
+    const { c_roll } = req.body;
+    
+    if (!c_roll) {
+      return res.status(400).json({ success: false, message: "c_roll is required" });
+    }
+    
+    const updatedTeacher = await Teacher.findOneAndUpdate(
+      { c_roll },
+      { hod: true },
+      { new: true }
+    );
+    
+    if (!updatedTeacher) {
+      return res.status(404).json({ success: false, message: "Teacher not found with this c_roll" });
+    }
+    
+    return res.status(200).json({ 
+      success: true, 
+      message: "Teacher successfully appointed as HOD", 
+      data: updatedTeacher 
+    });
+    
+  } catch (error) {
+    console.error("Error making teacher HOD:", error);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Internal server error", 
+      error: error.message 
+    });
+  }
+};
 
 
-module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode};
+module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD};
