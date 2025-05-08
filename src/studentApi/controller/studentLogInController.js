@@ -94,7 +94,10 @@ const singinStudents = async (req, res) => {
       payment,
       sem,
       paper_code,
-      admit
+      admit,
+      submit,
+      verify,
+      offline_student
     } = existingUser;
 
     res.status(201).json({
@@ -114,7 +117,10 @@ const singinStudents = async (req, res) => {
         payment,
         sem,
       paper_code,
-      admit
+      admit,
+      submit,
+      verify,
+      offline_student
       },
       token,
     });
@@ -130,6 +136,7 @@ const addStudentAcademicDetails = async (req, res) => {
   const {
     email,
     course_code,
+    select_offline,
     tenth_marks,
     tenth_year,
     twelfth_marks,
@@ -146,24 +153,75 @@ const addStudentAcademicDetails = async (req, res) => {
   } = req.body;
 
   try {
+    const updateData = {
+      course_code,
+      select_offline,
+      tenth_marks,
+      tenth_year,
+      twelfth_marks,
+      twelfth_year,
+      ug_name,
+      ug_marks,
+      ug_start,
+      ug_end,
+      other_course,
+      other_course_marks,
+      other_course_start,
+      other_course_end,
+      rank,
+      submit:true
+    };
+
+    const fileFields = ['tenth_file', 'twelfth_marks_file', 'ug_marks_file', 'other_marks_file', 'rank_file'];
+    
+    for (const field of fileFields) {
+      if (req.files && req.files[field]) {
+        const file = req.files[field];
+        
+        // Validate file size (2MB limit)
+        if (file.size > 2 * 1024 * 1024) {
+          return res.status(400).json({ 
+            message: `${field} exceeds the maximum file size of 2MB`
+          });
+        }
+        
+        // Validate file type (PDF only)
+        if (!file.mimetype.includes('pdf')) {
+          return res.status(400).json({
+            message: `${field} must be a PDF file`
+          });
+        }
+        
+        try {
+          // Upload to Cloudinary
+          const cloudinaryResponse = await cloudinary.uploader.upload(
+            file.tempFilePath,
+            {
+              resource_type: 'raw',
+              folder: 'student_academic_documents',
+              format: 'pdf'
+            }
+          );
+          
+          // Add the secure URL to update data
+          updateData[field] = cloudinaryResponse.secure_url;
+          
+          // Clean up temp file
+          fs.unlinkSync(file.tempFilePath);
+        } catch (uploadError) {
+          console.error(`Error uploading ${field}:`, uploadError);
+          return res.status(500).json({ 
+            message: `Error uploading ${field}`,
+            error: uploadError.message 
+          });
+        }
+      }
+    }
+
+    // Update student record with all data
     const updatedStudent = await Student.findOneAndUpdate(
       { email: email },
-      {
-        course_code,
-        tenth_marks,
-        tenth_year,
-        twelfth_marks,
-        twelfth_year,
-        ug_name,
-        ug_marks,
-        ug_start,
-        ug_end,
-        other_course,
-        other_course_marks,
-        other_course_start,
-        other_course_end,
-        rank,
-      },
+      updateData,
       { new: true }
     );
 
