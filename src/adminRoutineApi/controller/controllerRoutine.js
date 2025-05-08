@@ -212,12 +212,11 @@ function formatTime(dateObj) {
 
 const deleteTimeSlot = async (req, res) => {
   try {
-    const { course_id, course_name, sem, day, paper_code } = req.body;
+    const { course_id, sem, day, paper_code } = req.body;
 
     
     const courseRoutine = await CourseRoutine.findOne({
       course_id,
-      course_name,
       sem
     });
 
@@ -558,7 +557,6 @@ const findScheduleByPaperCodes = async (req, res) => {
     const results = routines.map(routine => {
       const result = {
         course_id: routine.course_id,
-        course_name: routine.course_name,
         week: routine.week,
         sem: routine.sem,
         date_range: routine.date_range

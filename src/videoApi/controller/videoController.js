@@ -126,4 +126,47 @@ const showAllBaseOnPaperCode = async (req, res) => {
   }
 };
 
-module.exports = {createPaper ,showAllBaseOnPaperCode};
+const deleteByCreatedTime=async(req,res)=>{
+  const{topic_name}=req.body
+
+  try {
+    
+  
+    // Validate required parameters
+    if ( !topic_name) {
+      return res.status(400).json({
+        success: false,
+        message: 'Both createdAt and topic_name are required parameters'
+      });
+    }
+    const exist= await Paper.findOne({
+      topic_name: topic_name
+    });
+
+    // Find all paper documents that match the criteria
+    const papers = await Paper.deleteOne({
+      topic_name: topic_name
+    });
+    if(!exist){
+      return res.status(400).json({
+        success: false,
+        message:`Topic Name : ${topic_name} is not exist in database`
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message:`Topic Name :  ${topic_name} deleted successfully`
+    });
+  }
+    catch (error) {
+      console.error('Error finding papers:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Server error while retrieving paper data',
+        error: error.message
+      });
+    }
+}
+
+module.exports = {createPaper ,showAllBaseOnPaperCode,deleteByCreatedTime};
