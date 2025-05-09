@@ -97,7 +97,9 @@ const singinStudents = async (req, res) => {
       admit,
       submit,
       verify,
-      offline_student
+      select_offline,
+      rejected,
+      sem_payment
     } = existingUser;
 
     res.status(201).json({
@@ -120,7 +122,9 @@ const singinStudents = async (req, res) => {
       admit,
       submit,
       verify,
-      offline_student
+      select_offline,
+      rejected,
+      sem_payment
       },
       token,
     });
