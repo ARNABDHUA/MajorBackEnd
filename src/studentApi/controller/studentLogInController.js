@@ -265,6 +265,7 @@ const generateCRoll = async (req, res) => {
       student.paper_code=paperCodes;
       student.sem="1";
       student.course_code=course_code;
+      student.sem_payment=true;
       await student.save();
       return res.status(200).json({
         name: student.name,
@@ -281,7 +282,8 @@ const generateCRoll = async (req, res) => {
         pic: student.pic,
         sem:student.sem,
         paper_code:student.paper_code,
-        payment: student.payment
+        payment: student.payment,
+        sem_payment:student.sem_payment
       });
     }
 
@@ -314,6 +316,7 @@ const generateCRoll = async (req, res) => {
     student.payment= true;
     student.c_roll = c_roll;
     student.course_code = course_code; 
+    student.sem_payment=true;
     await student.save();
 
     const user = await User.findOne({ email });//add for chat user
@@ -337,7 +340,8 @@ const generateCRoll = async (req, res) => {
       pic: student.pic,
       payment: student.payment,
       sem:student.sem,
-      paper_code:student.paper_code
+      paper_code:student.paper_code,
+      sem_payment:student.sem_payment
     });
 
   } catch (error) {
