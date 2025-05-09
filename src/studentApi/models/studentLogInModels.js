@@ -23,7 +23,7 @@ const studentSchema = new mongoose.Schema({
     default: "1"
   },
   select_offline:{type:Boolean,default:false},
-  offline_student:{type:Boolean,default:false},
+  // offline_student:{type:Boolean,default:false},
   tenth_marks: { type: Number, default: null },
   tenth_file:{type:String,default: ""},
   tenth_year: { type: Number, default: null },
@@ -46,6 +46,8 @@ const studentSchema = new mongoose.Schema({
   admit:{type:Boolean,default:false},
   submit:{type:Boolean,default:false},
   verify:{type:Boolean,default:false},
+  sem_payment:{type:Boolean,default:true},
+  rejected:{type:Boolean,default:false},
   pic: {
     type: String,
     default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
