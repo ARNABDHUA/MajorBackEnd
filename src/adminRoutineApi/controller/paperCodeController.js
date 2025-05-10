@@ -218,7 +218,7 @@ const CoursePaper = require('../models/paperCodeModel');
       const { paper_name, new_paper_code ,course_code, sem, paper_code} = req.body;
       
       const coursePaper = await CoursePaper.findOne({ 
-        course_code: Number(course_code), 
+        course_code: course_code, 
         sem 
       });
       

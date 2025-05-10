@@ -452,12 +452,16 @@ const logInTeacher= async(req,res)=>{
 
 const makeTeacherHOD = async (req, res) => {
   try {
-    const { c_roll } = req.body;
+    const { c_roll,course_code } = req.body;
     
     if (!c_roll) {
       return res.status(400).json({ success: false, message: "c_roll is required" });
     }
     
+    const hodCheck=await Teacher.findOne({course_code :course_code,hod:true})
+    if(hodCheck){
+      return res.status(404).json({ success: false, message: `Teacher ${hodCheck.name} is already Hod for the course_code ${course_code}` });
+    }
     const updatedTeacher = await Teacher.findOneAndUpdate(
       { c_roll },
       { hod: true },
