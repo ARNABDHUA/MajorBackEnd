@@ -1,4 +1,6 @@
 const Teacher = require('../models/teacherModel');
+const Applyteacher=require('../models/applyteacher');
+const chat=require('../../chatApi/models/userModel');
 const bcrypt=require("bcrypt");
 const jwt=require("jsonwebtoken");
 const cloudinary =require("./cloudinary.js");
@@ -488,5 +490,130 @@ const makeTeacherHOD = async (req, res) => {
   }
 };
 
+const applyTeacher = async (req, res) => {
+  try {
+    // Extract teacher data from request body
+    const {
+      name,
+      phoneNumber,
+      email,
+      address,
+      tenth_marks,
+      tenth_year,
+      twelfth_marks,
+      twelfth_year,
+      ug_name,
+      ug_marks,
+      ug_start,
+      ug_end,
+      other_course,
+      other_course_marks,
+      other_course_start,
+      other_course_end
+    } = req.body;
 
-module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode};
+    // Validate required fields
+    if (!name || !phoneNumber || !email ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required fields: name, phoneNumber and email"
+      });
+    }
+
+    // Check if email already exists
+    const existing = await chat.findOne({ email });
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: " This email already exists"
+      });
+    }
+    const existingTeacher = await Applyteacher.findOne({ email });
+    if (existingTeacher) {
+      return res.status(400).json({
+        success: false,
+        message: " This email already exists "
+      });
+    }
+    const existingphone = await Applyteacher.findOne({ phoneNumber });
+    if (existingphone) {
+      return res.status(400).json({
+        success: false,
+        message: " This phoneNumber already exists "
+      });
+    }
+
+    // Initialize teacher data
+    const teacherData = {
+      name,
+      phoneNumber,
+      email,
+      address,
+      tenth_marks: tenth_marks || null,
+      tenth_year: tenth_year || null,
+      twelfth_marks: twelfth_marks || null,
+      twelfth_year: twelfth_year || null,
+      ug_name: ug_name || null,
+      ug_marks: ug_marks || null,
+      ug_start: ug_start || null,
+      ug_end: ug_end || null,
+      other_course: other_course || null,
+      other_course_marks: other_course_marks || null,
+      other_course_start: other_course_start || null,
+      other_course_end: other_course_end || null,
+      submit:true
+    };
+
+    // Handle CV file upload if present
+    if (req.files && req.files.cv_file) {
+      const uploadedFile = req.files.cv_file;
+      const fileType = uploadedFile.mimetype;
+      
+      // Validate file type (PDF only)
+      if (!fileType.includes('pdf')) {
+        return res.status(400).json({
+          success: false,
+          message: "Please upload CV in PDF format only"
+        });
+      }
+
+      // Determine resource type based on file type
+      const resourceType = fileType.includes('pdf') ? 'raw' : 'image';
+      
+      // Upload file to Cloudinary
+      const cloudinaryResponse = await cloudinary.uploader.upload(
+        uploadedFile.tempFilePath, 
+        {
+          resource_type: resourceType,
+          folder: "teacher_cvs" // Keeping original folder for teacher CVs
+        }
+      );
+      
+      // Clean up the temporary file
+      const fs = require('fs');
+      fs.unlinkSync(uploadedFile.tempFilePath);
+      
+      // Add Cloudinary URL to teacher data
+      teacherData.cv_file = cloudinaryResponse.secure_url;
+    }
+
+    // Create new teacher application
+    const newTeacher = await Applyteacher.create(teacherData);
+
+    return res.status(201).json({
+      success: true,
+      message: "Teacher application submitted successfully",
+      data: newTeacher
+    });
+  } catch (error) {
+    console.error("Error making apply teach:", error);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Internal server error", 
+      error: error.message 
+    });
+  }
+};
+
+
+module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode,applyTeacher};
