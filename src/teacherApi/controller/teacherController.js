@@ -615,5 +615,33 @@ const applyTeacher = async (req, res) => {
   }
 };
 
+const applyTeacherCheck=async(req,res)=>{
+  try{
+  const {phoneNumber,email}=req.body;
+  const exist = await Applyteacher.findOne({ email,phoneNumber });
+  if (!exist) {
+    return res.status(400).json({
+      success:false,
+      message: " User not found"
+    });
+  }
+  
+  return res.status(201).json({
+    success: true,
+    message: "Teacher application fatch successfully",
+    data: exist
+  });
+  }catch (error) {
+    console.error("Error making apply fatch teach:", error);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Internal server error", 
+      error: error.message 
+    });
+  }
 
-module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode,applyTeacher};
+
+}
+
+
+module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode,applyTeacher ,applyTeacherCheck};
