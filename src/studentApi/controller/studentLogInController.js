@@ -531,5 +531,58 @@ const signupOtpValidate = async (req, res) => {
   }
 };
 
+const applyStudents=async(req,res)=>{
+  const {course_code}=req.body
+  try{
+    const record = await Student.find({ course_code: course_code,submit:true, c_roll: null });
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new student not found" });
+    }
+    return res.status(200).json({ success: true, message: "course_code data found" ,data:record});
 
-module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword};
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+}
+ const vaidateStudent=async(req,res)=>{
+  const {email}=req.body
+  try{
+    const record = await Student.findOneAndUpdate(
+      { email: email },      
+      { verify:true },          // update
+      { new: true, } // important: upsert!
+    )
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new student not found" });
+    }
+    return res.status(200).json({ success: true, message: "verify the student" ,data:record});
+
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+ }
+
+ const rejected= async(req,res)=>{
+  const {email}=req.body
+  try{
+    const record = await Student.findOneAndUpdate(
+      { email: email },      
+      { rejected:true },          // update
+      { new: true, } // important: upsert!
+    )
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new student not found" });
+    }
+    return res.status(200).json({ success: true, message: "Rejected the student" ,data:record});
+
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+
+ }
+
+
+module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword,applyStudents,vaidateStudent,rejected};
