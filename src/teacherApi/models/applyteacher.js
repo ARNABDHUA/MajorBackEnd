@@ -33,6 +33,8 @@ const teacherSchema = new mongoose.Schema({
   other_course_marks: { type: Number, default: null },
   other_course_start: { type: String, default: null },
   other_course_end: { type: String, default: null },
+  not_selected:{type:Boolean,default:false},
+  selected:{type:Boolean,default:false},
   cv_file:{type:String,default: ""}
 }, {
   timestamps: true

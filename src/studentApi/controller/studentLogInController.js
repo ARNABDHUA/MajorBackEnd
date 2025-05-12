@@ -534,7 +534,7 @@ const signupOtpValidate = async (req, res) => {
 const applyStudents=async(req,res)=>{
   const {course_code}=req.body
   try{
-    const record = await Student.find({ course_code: course_code,submit:true, c_roll: null });
+    const record = await Student.find({ course_code: course_code,submit:true, c_roll: null,rejected:false });
     if (!record) {
       return res.status(400).json({ success: false, message: "new student not found" });
     }
@@ -567,6 +567,10 @@ const applyStudents=async(req,res)=>{
  const rejected= async(req,res)=>{
   const {email}=req.body
   try{
+  const verifyStudent= await Student.findOne({email:email,verify:true});
+  if(verifyStudent){
+    return res.status(400).json({ success: false, message: "new student already verify.Reject not possible !!" });
+  }
     const record = await Student.findOneAndUpdate(
       { email: email },      
       { rejected:true },          // update

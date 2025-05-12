@@ -13,19 +13,18 @@ const createTeacher = async (req, res) => {
     const {
       name,
       phoneNumber,
-      email,
-      salary,
-      teacher_course,
-      password // get password from request body
+      email// get password from request body
     } = req.body;
 
-    // Step 1️⃣: Check if the email already exists
     const existingEmail = await Teacher.findOne({ email });
     if (existingEmail) {
       return res.status(400).json({ message: 'Email already exists!' });
     }
+    const existingEmailInApply = await Applyteacher.findOne({ email:email,verify:true, rejected:false});
+    if(! existingEmailInApply){
+      return res.status(400).json({ message: 'Teacher is not verify' });
+    }
 
-    // Step 2️⃣: Generate the c_roll
     const currentYear = new Date().getFullYear().toString().slice(-2); // last two digits of the year
     const phoneDigits = phoneNumber.slice(0, 2); // first two digits of phone number
 
@@ -41,24 +40,22 @@ const createTeacher = async (req, res) => {
 
     const c_roll = `7${currentYear}${phoneDigits}${newIncrement}`;
 
-    // Step 3️⃣: Extra check if c_roll already exists (very unlikely)
     const existingCRoll = await Teacher.findOne({ c_roll });
     if (existingCRoll) {
       return res.status(400).json({ message: 'c_roll already exists! Please try again.' });
     }
 
-    // Step 4️⃣: Hash the password before saving
+    
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const passData=`Data@${phoneNumber}`
+    const hashedPassword = await bcrypt.hash(passData, saltRounds);
 
-    // Step 5️⃣: Create new teacher
+    
     const newTeacher = new Teacher({
       name,
       c_roll, // using generated c_roll
       phoneNumber,
       email,
-      salary,
-      teacher_course,
       password: hashedPassword // save hashed password
     });
 
@@ -643,5 +640,78 @@ const applyTeacherCheck=async(req,res)=>{
 
 }
 
+const vaidateTeacher=async(req,res)=>{
+  const {email}=req.body
+  try{
+    const record = await Applyteacher.findOneAndUpdate(
+      { email: email },      
+      { verify:true },          // update
+      { new: true, } 
+    )
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new Teacher not found" });
+    }
+    return res.status(200).json({ success: true, message: "verify the Teacher" ,data:record});
 
-module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode,applyTeacher ,applyTeacherCheck};
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+ }
+
+ const rejected= async(req,res)=>{
+  const {email}=req.body
+  try{
+    const record = await Applyteacher.findOneAndUpdate(
+      { email: email },      
+      { $set: { rejected: true, verify: false } },         // update
+      { new: true, } 
+    )
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new Teacher not found" });
+    }
+    return res.status(200).json({ success: true, message: "Rejected the Teacher" ,data:record});
+
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+
+ }
+
+ const teacherNotSelected= async(req,res)=>{
+  const {email}=req.body
+  try{
+    const record = await Applyteacher.findOneAndUpdate(
+      { email: email ,verify:true},      
+      { not_selected:true },          // update
+      { new: true, } 
+    )
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new Teacher not found" });
+    }
+    return res.status(200).json({ success: true, message: " The Teacher was not selected" ,data:record});
+
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+
+ }
+
+
+ const applyTeacherData=async(req,res)=>{
+  try{
+    const record = await Applyteacher.find({submit:true,rejected:false });
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new Teacher not found" });
+    }
+    return res.status(200).json({ success: true, message: "apply teacher data found" ,data:record});
+
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+}
+
+module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode,applyTeacher ,applyTeacherCheck,vaidateTeacher,rejected,applyTeacherData};
