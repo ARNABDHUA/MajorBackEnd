@@ -48,6 +48,7 @@ const studentSchema = new mongoose.Schema({
   verify:{type:Boolean,default:false},
   sem_payment:{type:Boolean,default:true},
   rejected:{type:Boolean,default:false},
+  regular:{type:Boolean,default:false},
   pic: {
     type: String,
     default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",

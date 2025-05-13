@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 // const studentNameRoutes = require("./studentNameRoutes");
-const {singupStudents ,singinStudents ,addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword,applyStudents,vaidateStudent,rejected}=require("../controller/studentLogInController");
+const {singupStudents ,singinStudents ,addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword,applyStudents,vaidateStudent,rejected,verifyApplyStudentsList,regularOfflineStudentsList,regularOnlineStudentsList,regularOnlineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPaymentReject}=require("../controller/studentLogInController");
 const { validateSignup ,validateLogIn } = require("../middlewares/validationSingup");
 const auth=require("../../../authMiddlewares/auth")
 const {recordAttendance,updateExitTime,todayRecordStudent,getTotalClassesCount,getPresentStudentsByPaperCode,getStudentAttendanceStats}=require('../controller/studentAttenance')
@@ -21,6 +21,18 @@ router.post("/student-rollgenerate", generateCRoll);
 router.post("/student-apply", applyStudents);
 
 router.post("/student-verify", vaidateStudent);
+
+router.post("/student-verifylist", verifyApplyStudentsList);// new payment
+
+router.post("/student-offline-student", regularOfflineStudentsList);//new payment
+
+router.post("/student-online-student", regularOnlineStudentsList);//new payment
+
+router.post("/student-online-student-due", regularOnlineStudentsListDueSemPayment);//new payment
+
+router.post("/student-offline-student-due", regularOfflineStudentsListDueSemPayment);//new payment
+
+router.post("/student-due-noacc", regularOfflineStudentsListDueSemPaymentReject);//new payment
 
 router.post("/student-rejected", rejected);
 

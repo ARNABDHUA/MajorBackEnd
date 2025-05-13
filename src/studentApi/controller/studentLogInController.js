@@ -266,6 +266,7 @@ const generateCRoll = async (req, res) => {
       student.sem="1";
       student.course_code=course_code;
       student.sem_payment=true;
+      student.regular=true;
       await student.save();
       return res.status(200).json({
         name: student.name,
@@ -283,7 +284,8 @@ const generateCRoll = async (req, res) => {
         sem:student.sem,
         paper_code:student.paper_code,
         payment: student.payment,
-        sem_payment:student.sem_payment
+        sem_payment:student.sem_payment,
+        regular:student.regular
       });
     }
 
@@ -317,6 +319,7 @@ const generateCRoll = async (req, res) => {
     student.c_roll = c_roll;
     student.course_code = course_code; 
     student.sem_payment=true;
+    student.regular=true;
     await student.save();
 
     const user = await User.findOne({ email });//add for chat user
@@ -341,7 +344,8 @@ const generateCRoll = async (req, res) => {
       payment: student.payment,
       sem:student.sem,
       paper_code:student.paper_code,
-      sem_payment:student.sem_payment
+      sem_payment:student.sem_payment,
+      regular:student.regular
     });
 
   } catch (error) {
@@ -588,5 +592,105 @@ const applyStudents=async(req,res)=>{
 
  }
 
+ const verifyApplyStudentsList=async(req,res)=>{
+  const {course_code}=req.body
+  try{
+    const record = await Student.find({ course_code: course_code,submit:true, c_roll: null,rejected:false,verify:true });
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new student not found" });
+    }
+    return res.status(200).json({ success: true, message: " verify student list found" ,data:record});
 
-module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword,applyStudents,vaidateStudent,rejected};
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+}
+
+const regularOfflineStudentsList=async(req,res)=>{
+  const {course_code}=req.body
+  try{
+    const record = await Student.find({ course_code: course_code,submit:true,rejected:false,verify:true,select_offline:true ,regular:true});
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new student not found" });
+    }
+    return res.status(200).json({ success: true, message: "new regular student list found" ,data:record});
+
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+}
+
+const regularOnlineStudentsList=async(req,res)=>{
+  const {course_code}=req.body
+  try{
+    const record = await Student.find({ course_code: course_code,submit:true,rejected:false,verify:true,select_offline:false ,regular:true});
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new student not found" });
+    }
+    return res.status(200).json({ success: true, message: "new regular student list found" ,data:record});
+
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+}
+
+const regularOnlineStudentsListDueSemPayment=async(req,res)=>{
+  const {course_code}=req.body
+  try{
+    const record = await Student.find({ course_code: course_code,submit:true, payment: true,
+      sem_payment:false,rejected:false,verify:true,select_offline:false ,regular:true});
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new student not found" });
+    }
+    return res.status(200).json({ success: true, message: "new regular student list found" ,data:record});
+
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+}
+
+const regularOfflineStudentsListDueSemPayment=async(req,res)=>{
+  const {course_code}=req.body
+  try{
+    const record = await Student.find({ course_code: course_code,submit:true, payment: true,
+      sem_payment:false,rejected:false,verify:true,select_offline:true ,regular:true});
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new student not found" });
+    }
+    return res.status(200).json({ success: true, message: "new regular student list found" ,data:record});
+
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+}
+const regularOfflineStudentsListDueSemPaymentReject=async(req,res)=>{
+  const {email}=req.body
+  try{
+    const records = await Student.findOne({ email:email});
+    if (!records) {
+      return res.status(400).json({ success: false, message: "new student not found" });
+    }
+
+    const record = await Student.findOneAndUpdate(
+      { email: email },      
+      { payment:false },          // update
+      { new: true, } // important: upsert!
+    )
+    if (!record) {
+      return res.status(400).json({ success: false, message: "new student not found" });
+    }
+    return res.status(200).json({ success: true, message: "Access restricted student" ,data:record});
+
+
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+}
+
+module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword,applyStudents,vaidateStudent,rejected,verifyApplyStudentsList,regularOfflineStudentsList,regularOnlineStudentsList,regularOnlineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPaymentReject};
