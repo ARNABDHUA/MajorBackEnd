@@ -258,7 +258,8 @@ const getPresentStudentsByPaperCode = async (req, res) => {
       // Get total number of students (present or not) for this paper code today
       const totalStudents = await Student.countDocuments({
         payment:true, 
-        course_code:course_code
+        course_code:course_code,
+        paper_code:paper_code//add today
       });
   
       return res.status(200).json({
