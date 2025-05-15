@@ -296,7 +296,8 @@ const getStudentAttendanceStats = async (req, res) => {
       // Get total students enrolled in this course who have made payment
       const totalStudents = await Student.countDocuments({
         payment: true,
-        course_code: course_code
+        course_code: course_code,
+        paper_code:paper_code //add today
       });
    
       // Get all unique dates when classes were conducted for this paper code
