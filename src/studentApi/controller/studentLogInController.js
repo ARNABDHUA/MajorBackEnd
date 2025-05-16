@@ -693,4 +693,97 @@ const regularOfflineStudentsListDueSemPaymentReject=async(req,res)=>{
 }
 }
 
-module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword,applyStudents,vaidateStudent,rejected,verifyApplyStudentsList,regularOfflineStudentsList,regularOnlineStudentsList,regularOnlineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPaymentReject};
+const getAllStudent=async(req,res)=>{
+  const {course_code,sem}=req.body
+  try{
+    const records = await Student.find({ course_code:course_code,sem:sem,payment:true});
+    if (!records) {
+      return res.status(400).json({ success: false, message: " student not found" });
+    }
+    return res.status(200).json({ success: true,length:records.length ,message: "all student data" ,data:records});
+
+  } catch (error) {
+  console.error(error);
+  return res.status(500).json({ success: false, message: "Server error applycation!" });
+}
+};
+
+const upgradeStudent = async (req, res) => {
+  try {
+    const { course_code, sem } = req.body;
+    
+    // Validate input
+    if (!course_code || !sem) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Both course_code and sem are required" 
+      });
+    }
+
+    const currentSem = String(sem);
+    const newSem = String(Number(sem) + 1);
+    
+    // Find students in the current semester with the given course code
+    const studentsToUpdate = await Student.find({ 
+      course_code: course_code, 
+      sem: currentSem 
+    });
+    
+    if (studentsToUpdate.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "No students found in the specified course and semester" 
+      });
+    }
+    
+    // Get the paper data for the next semester
+    const nextSemPaperData = await CoursePaper.findOne({
+      course_code: course_code,
+      sem: newSem
+    });
+    
+    if (!nextSemPaperData || !nextSemPaperData.papers || nextSemPaperData.papers.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "No paper codes found for the next semester. Course may be completed." 
+      });
+    }
+    
+    const newPaperCodes = nextSemPaperData.papers.map(paper => paper.paper_code);
+    
+    // console.log(`Upgrading students from semester ${currentSem} to ${newSem}`);
+    // console.log(`New paper codes: `, newPaperCodes);
+    
+   
+    const result = await Student.updateMany(
+      { course_code: course_code, sem: currentSem },
+      { 
+        $set: { 
+          sem: newSem,
+          paper_code: newPaperCodes,
+           sem_payment:false
+        } 
+      }
+    );
+    
+    res.status(200).json({
+      success: true,
+      message: `${result.modifiedCount} student(s) updated from semester ${currentSem} to ${newSem}`,
+      details: {
+        previousSemester: currentSem,
+        newSemester: newSem,
+        updatedPaperCodes: newPaperCodes
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error upgrading students:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'An error occurred while upgrading students.',
+      error: error.message
+    });
+  }
+};
+
+module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword,applyStudents,vaidateStudent,rejected,verifyApplyStudentsList,regularOfflineStudentsList,regularOnlineStudentsList,regularOnlineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPaymentReject,getAllStudent,upgradeStudent};
