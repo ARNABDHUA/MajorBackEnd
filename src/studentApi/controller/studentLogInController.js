@@ -671,9 +671,9 @@ const regularOfflineStudentsListDueSemPayment=async(req,res)=>{
 const regularOfflineStudentsListDueSemPaymentReject=async(req,res)=>{
   const {email}=req.body
   try{
-    const records = await Student.findOne({ email:email});
+    const records = await Student.findOne({ email:email,sem_payment:false});
     if (!records) {
-      return res.status(400).json({ success: false, message: "new student not found" });
+      return res.status(400).json({ success: false, message: " student not found" });
     }
 
     const record = await Student.findOneAndUpdate(
