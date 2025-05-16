@@ -8,6 +8,8 @@ const fs = require("fs");
 
 const SECRET_KEY="helloArnab";
 
+const { sendEmailService } = require("../service/mailService");
+
 const createTeacher = async (req, res) => {
   try {
     const {
@@ -60,6 +62,7 @@ const createTeacher = async (req, res) => {
     });
 
     await newTeacher.save();
+    let send = await sendEmailService(email,name,c_roll,passData);
 
     res.status(201).json({
       message: 'Teacher created successfully',
