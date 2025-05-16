@@ -714,4 +714,24 @@ const vaidateTeacher=async(req,res)=>{
 }
 }
 
-module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode,applyTeacher ,applyTeacherCheck,vaidateTeacher,rejected,applyTeacherData};
+const paymentUpdate = async (req, res) => {
+  try {
+    const{c_roll,salary}=req.body;
+    const teacher = await Teacher.findOne({c_roll});
+    if (!teacher) return res.status(404).json({ message: 'Teacher not found' });
+
+const record = await Teacher.findOneAndUpdate(
+      { c_roll: c_roll },      
+      { salary:salary },          // update
+      { new: true, } // important: upsert!
+    )
+    if (!record) {
+      return res.status(400).json({ success: false, message: "Teacher data not found" });
+    }
+    return res.status(200).json({ success: true, message: "Salary update" ,data:record});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode,applyTeacher ,applyTeacherCheck,vaidateTeacher,rejected,applyTeacherData,paymentUpdate};

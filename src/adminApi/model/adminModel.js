@@ -16,6 +16,10 @@ const studentSchema = new mongoose.Schema({
     type:Boolean,
     default:true,
  },
+ phoneNumber:{
+    type: String,
+    required: true,
+ },
  registration_admin :{
     type:Boolean,
     default:false,

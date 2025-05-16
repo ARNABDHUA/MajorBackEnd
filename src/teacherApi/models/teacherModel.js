@@ -27,7 +27,8 @@ const teacherSchema = new mongoose.Schema({
     type: String
   },
   salary: {
-    type: Number
+    type: Number,
+    default:0
   },
   image: {
     type: String,
