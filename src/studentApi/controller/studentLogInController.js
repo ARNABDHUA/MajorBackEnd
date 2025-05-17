@@ -257,16 +257,18 @@ const generateCRoll = async (req, res) => {
     // If c_roll already exists
     if (student.c_roll) {
           // Find the course paper record
+          const newSem=student.sem//add
           const coursePaper = await CoursePaper.findOne({ 
             course_code: course_code, 
-            sem :"1"
+            sem :newSem//add
           });
           const paperCodes = coursePaper.papers.map(paper => paper.paper_code);
       student.paper_code=paperCodes;
-      student.sem="1";
+      student.sem=newSem;//add
       student.course_code=course_code;
       student.sem_payment=true;
       student.regular=true;
+      student.payment=true;//add
       await student.save();
       return res.status(200).json({
         name: student.name,
@@ -786,4 +788,61 @@ const upgradeStudent = async (req, res) => {
   }
 };
 
-module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword,applyStudents,vaidateStudent,rejected,verifyApplyStudentsList,regularOfflineStudentsList,regularOnlineStudentsList,regularOnlineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPaymentReject,getAllStudent,upgradeStudent};
+const sendEmailResetPassOtp = async (req, res) => {
+  const { email ,phoneNumber} = req.body;
+  // let data="arnabdhua74@gmail.com"
+
+  const check = await Student.findOne({ email:email,phoneNumber:phoneNumber });
+  if (check ) {
+    try {
+      let otp = await sendEmailService(email);
+      // console.log("otppppppppppppp", otp);
+  
+      const test = await emailotpsignup.findOneAndUpdate(
+        { email: email },      // filter
+        { otp: otp },          // update
+        { new: true, upsert: true } // important: upsert!
+      );
+  
+      res.status(200).json({ message: "OTP send to your mail" });
+    } catch (error) {
+      console.error(error); // log the real error for debugging
+      res.status(500).json({ error: "Email otp sending failed" });
+    }
+  } else {
+    res.status(400).json({ message: "User not exists !!" });
+  }
+  
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    // Validate input
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: 'Email and new password are required.' });
+    }
+
+    // Find the student by email
+    const student = await Student.findOne({ email });
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found.' });
+    }
+
+    // Hash the new password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update the student's password
+    student.password = hashedPassword;
+    await student.save();
+
+    return res.status(200).json({ message: 'Password reset successful.' });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+module.exports = { singupStudents, singinStudents , addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword,applyStudents,vaidateStudent,rejected,verifyApplyStudentsList,regularOfflineStudentsList,regularOnlineStudentsList,regularOnlineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPaymentReject,getAllStudent,upgradeStudent,sendEmailResetPassOtp,resetPassword };

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 // const studentNameRoutes = require("./studentNameRoutes");
-const {singupStudents ,singinStudents ,addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword,applyStudents,vaidateStudent,rejected,verifyApplyStudentsList,regularOfflineStudentsList,regularOnlineStudentsList,regularOnlineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPaymentReject,getAllStudent,upgradeStudent}=require("../controller/studentLogInController");
+const {singupStudents ,singinStudents ,addStudentAcademicDetails,generateCRoll,updateStudentProfile,sendEmailController,signupOtpValidate,sendForgetPassword,applyStudents,vaidateStudent,rejected,verifyApplyStudentsList,regularOfflineStudentsList,regularOnlineStudentsList,regularOnlineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPayment,regularOfflineStudentsListDueSemPaymentReject,getAllStudent,upgradeStudent,sendEmailResetPassOtp ,resetPassword}=require("../controller/studentLogInController");
 const { validateSignup ,validateLogIn } = require("../middlewares/validationSingup");
 const auth=require("../../../authMiddlewares/auth")
 const {recordAttendance,updateExitTime,todayRecordStudent,getTotalClassesCount,getPresentStudentsByPaperCode,getStudentAttendanceStats}=require('../controller/studentAttenance')
@@ -43,6 +43,10 @@ router.post("/student-rejected", rejected);
 router.post("/student-update", updateStudentProfile);
 
 router.post("/student-mail-otp", sendEmailController);
+
+router.post("/student-mail-resetpass-otp", sendEmailResetPassOtp);//reset password
+
+router.post("/student-resetpassword", resetPassword);//reset password
 
 router.post("/student-mail-otp-validate", signupOtpValidate);
 

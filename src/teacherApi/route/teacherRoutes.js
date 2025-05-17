@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher, updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode,applyTeacher,applyTeacherCheck,vaidateTeacher,rejected,applyTeacherData,paymentUpdate} = require('../controller/teacherController');
+const { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher, updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode,applyTeacher,applyTeacherCheck,vaidateTeacher,rejected,applyTeacherData,paymentUpdate,signupOtpValidate,sendEmailResetPassOtp,resetPassword} = require('../controller/teacherController');
 const {updateTeacherValidation}= require('../middlewares/teacherMiddleware');
 const {recordAttendance,updateExitTime,getAttendanceByPaperAndRoll}=require('../controller/attendanceController')
 router.get("/", (req, res) => {
@@ -54,5 +54,11 @@ router.post('/teachers-verify', vaidateTeacher);
 router.post('/teachers-apply-check', applyTeacherCheck);
 
 router.post('/teachers-apply-all', applyTeacherData);
+
+router.post('/otp-validate', signupOtpValidate);
+
+router.post('/teachers-email-pass', sendEmailResetPassOtp);
+
+router.post('/reset-pass', resetPassword);
 
 module.exports = router;

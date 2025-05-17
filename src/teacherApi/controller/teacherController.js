@@ -8,7 +8,9 @@ const fs = require("fs");
 
 const SECRET_KEY="helloArnab";
 
+const emailotpsignup=require('../../studentApi/models/emailsender');
 const { sendEmailService } = require("../service/mailService");
+const { sendEmailServices } = require("../service/otpEmailService");
 
 const createTeacher = async (req, res) => {
   try {
@@ -737,4 +739,89 @@ const record = await Teacher.findOneAndUpdate(
   }
 };
 
-module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode,applyTeacher ,applyTeacherCheck,vaidateTeacher,rejected,applyTeacherData,paymentUpdate};
+const sendEmailResetPassOtp = async (req, res) => {
+  const { email ,phoneNumber} = req.body;
+  // let data="arnabdhua74@gmail.com"
+
+  const check = await Teacher.findOne({ email:email,phoneNumber:phoneNumber });
+  if (check ) {
+    try {
+      let otp = await sendEmailServices(email);
+      // console.log("otppppppppppppp", otp);
+  
+      const test = await emailotpsignup.findOneAndUpdate(
+        { email: email },      // filter
+        { otp: otp },          // update
+        { new: true, upsert: true } // important: upsert!
+      );
+  
+      res.status(200).json({ message: "OTP send to your mail" });
+    } catch (error) {
+      console.error(error); // log the real error for debugging
+      res.status(500).json({ error: "Email otp sending failed" });
+    }
+  } else {
+    res.status(400).json({ message: "User not exists !!" });
+  }
+  
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    // Validate input
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: 'Email and new password are required.' });
+    }
+
+    // Find the student by email
+    const student = await Teacher.findOne({ email });
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found.' });
+    }
+
+    // Hash the new password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update the student's password
+    student.password = hashedPassword;
+    await student.save();
+
+    return res.status(200).json({ message: 'Password reset successful.' });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+const signupOtpValidate = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    // Find the record matching email and otp
+    const record = await emailotpsignup.findOne({ email: email, otp: otp });
+
+    if (!record) {
+      return res.status(400).json({ success: false, message: "Invalid OTP!" });
+    }
+
+    // Check if OTP is expired
+    const otpGeneratedTime = record.updatedAt;
+    const currentTime = new Date();
+    const differenceInMinutes = (currentTime - otpGeneratedTime) / (1000 * 60); // milliseconds to minutes
+
+    if (differenceInMinutes > 10) {
+      return res.status(400).json({ success: false, message: "Your OTP has expired. Please request a new one." });
+    }
+
+    // If OTP is valid and not expired
+    return res.status(200).json({ success: true, message: "OTP verified successfully!" });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Server error during OTP verification!" });
+  }
+};
+
+module.exports = { createTeacher, getAllTeachers , getTeacherById , updateTeacher, deleteTeacher , updateTeacherCourseByCRoll,logInTeacher,removeQualification,updateTeacherCourseCode,makeTeacherHOD,getAllTeachersByCourseCode,applyTeacher ,applyTeacherCheck,vaidateTeacher,rejected,applyTeacherData,paymentUpdate,signupOtpValidate,sendEmailResetPassOtp,resetPassword};
