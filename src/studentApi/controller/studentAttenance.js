@@ -297,7 +297,7 @@ const getStudentAttendanceStats = async (req, res) => {
       const totalStudents = await Student.countDocuments({
         payment: true,
         course_code: course_code,
-        paper_code:paper_code //add today
+        // paper_code:paper_code //add today
       });
    
       // Get all unique dates when classes were conducted for this paper code
@@ -347,6 +347,7 @@ const getStudentAttendanceStats = async (req, res) => {
           name: student.name,
           email: student.email,
           c_roll: student.c_roll,
+          type:student.select_offline,//add today
           totalClasses: totalClasses,
           presentCount: presentCount,
           absentCount: absentCount,
