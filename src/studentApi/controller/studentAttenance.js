@@ -313,7 +313,7 @@ const getStudentAttendanceStats = async (req, res) => {
       const enrolledStudents = await Student.find({
         payment: true,
         course_code: course_code
-      }).select('name email c_roll');
+      }).select('name email c_roll select_offline');
    
       // Create attendance statistics for each student
       const attendanceStats = [];

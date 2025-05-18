@@ -580,7 +580,7 @@ const applyTeacher = async (req, res) => {
       }
 
       // Determine resource type based on file type
-      const resourceType = fileType.includes('pdf') ? 'raw' : 'image';
+      const resourceType = fileType.includes('pdf') ? 'image' : 'image';
       
       // Upload file to Cloudinary
       const cloudinaryResponse = await cloudinary.uploader.upload(
