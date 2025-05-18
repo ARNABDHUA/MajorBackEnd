@@ -297,7 +297,7 @@ const getStudentAttendanceStats = async (req, res) => {
       const totalStudents = await Student.countDocuments({
         payment: true,
         course_code: course_code,
-        // paper_code:paper_code //add today
+        paper_code:paper_code //add today
       });
    
       // Get all unique dates when classes were conducted for this paper code
@@ -312,7 +312,7 @@ const getStudentAttendanceStats = async (req, res) => {
       // Get all unique students enrolled in the course
       const enrolledStudents = await Student.find({
         payment: true,
-        course_code: course_code
+        course_code: course_code, paper_code:paper_code //add today
       }).select('name email c_roll select_offline');
    
       // Create attendance statistics for each student
