@@ -31,12 +31,12 @@ const createNotice = async (req, res) => {
       }
   
       // Check if files are provided
-      if (!req.files || !req.files.file) {
-        return res.status(400).json({
-          status: "error",
-          message: "No file was received. Please upload a file."
-        });
-      }
+    //   if (!req.files || !req.files.file) {
+    //     return res.status(400).json({
+    //       status: "error",
+    //       message: "No file was received. Please upload a file."
+    //     });
+    //   }
   
       const uploadedFile = req.files.file;
       
