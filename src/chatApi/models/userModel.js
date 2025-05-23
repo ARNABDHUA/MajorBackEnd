@@ -27,7 +27,19 @@ const userSchema = mongoose.Schema(
         default: false,
       },
       c_roll: {
-        type: String, default: null
+        type: String, default: ""
+      },
+      course_code:{
+        type: [String], 
+        default: []
+      },
+      valid_teacher :{
+        type: Boolean,
+        default: false,
+      },
+      valid_admin :{
+        type: Boolean,
+        default: false,
       },
     },
     { timestamps: true }

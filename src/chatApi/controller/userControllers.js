@@ -209,7 +209,8 @@ const allUsers = async (req, res) => {
       email,
       isvalide:true,
       isteacher: true,
-      isAdmin:true
+      isAdmin:true,
+      valid_teacher:true
     });
   
     if (user) {
@@ -238,6 +239,7 @@ const allUsers = async (req, res) => {
     user.isteacher = true;
     user.isAdmin=true;
     user.isvalide=true;
+    user.valid_teacher=true;
     await user.save();
   
     res.status(200).json(user); // return full updated user
@@ -274,9 +276,10 @@ const allUsers = async (req, res) => {
           { email: { $regex: req.query.search, $options: "i" } },
         ],
         isvalide: true,
-        isAdmin: true
+        isAdmin: true,
+        valid_teacher:true//add 
       }
-    : { isvalide: true, isAdmin: true };
+    : { isvalide: true, isAdmin: true,valid_teacher:true };
 
   const users = await User.find(keyword).find({ _id: { $ne: useId } });
   res.send(users);
