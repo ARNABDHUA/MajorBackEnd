@@ -262,6 +262,102 @@ const accessChat =async (req, res) => {
     }
   };
   
+  const makeAdmin = async (req, res) => {
+    try {
+      const { chatId, userId, ownId } = req.body;
   
+      // Validate required fields
+      if (!chatId || !userId || !ownId) {
+        return res.status(400).json({
+          success: false,
+          message: "Chat ID, User ID, and Owner ID are required"
+        });
+      }
+  
+      // Find the chat
+      const chat = await Chat.findById(chatId);
+      if (!chat) {
+        return res.status(404).json({
+          success: false,
+          message: "Chat not found"
+        });
+      }
+  
+      // Check if it's a group chat
+      if (!chat.isGroupChat) {
+        return res.status(400).json({
+          success: false,
+          message: "This operation is only allowed for group chats"
+        });
+      }
+  
+  
+  
+      // Check if user is a member of the chat
+      if (!chat.users.includes(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "User is not a member of this chat"
+        });
+      }
+  
+      // Handle case where groupAdmin might be a single ObjectId or an array
+      let currentAdmins = [];
+      if (Array.isArray(chat.groupAdmin)) {
+        currentAdmins = chat.groupAdmin;
+      } else if (chat.groupAdmin) {
+        currentAdmins = [chat.groupAdmin];
+      }
+  
+      // Check if user is already an admin
+      const isAlreadyAdmin = currentAdmins.some(admin => admin.toString() === userId.toString());
+      if (isAlreadyAdmin) {
+        return res.status(400).json({
+          success: false,
+          message: "User is already an admin"
+        });
+      }
+  
+      // Check if ownId is an admin
+      const isOwnerAdmin = currentAdmins.some(admin => admin.toString() === ownId.toString());
+      if (!isOwnerAdmin) {
+        return res.status(403).json({
+          success: false,
+          message: "Only group admins can make other users admin"
+        });
+      }
+  
+      // Update groupAdmin field - ensure it's always an array
+      const newAdmins = [...currentAdmins, userId];
+      const updatedChat = await Chat.findByIdAndUpdate(
+        chatId,
+        {
+          $set: { groupAdmin: newAdmins }
+        },
+        {
+          new: true,
+          populate: [
+            { path: "users", select: "name email" },
+            { path: "groupAdmin", select: "name email" },
+            { path: "latestMessage" }
+          ]
+        }
+      );
+  
+      res.status(200).json({
+        success: true,
+        message: "User has been made admin successfully",
+        data: updatedChat
+      });
+  
+    } catch (error) {
+      console.error("Error making user admin:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        error: error.message
+      });
+    }
+  };
 
-  module.exports = { accessChat,fetchChats,createGroupChat, renameGroup, addToGroup,removeFromGroup,updateGroupChatAdminMode,getChatById};
+  module.exports = { accessChat,fetchChats,createGroupChat, renameGroup, addToGroup,removeFromGroup,updateGroupChatAdminMode,getChatById,makeAdmin};

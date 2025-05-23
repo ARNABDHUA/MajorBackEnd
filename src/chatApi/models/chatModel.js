@@ -9,7 +9,7 @@ const chatModel = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Message",
     },
-    groupAdmin: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    groupAdmin: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     adminOnlyMode: { type: Boolean, default: false }, // Add this new field
   },
   { timestamps: true }

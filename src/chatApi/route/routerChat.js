@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {registerUser, chatUser,allUsers,updateUserImage,getImage,getImageteacher,registerTeacher,makeUserTeacher,makeUserStudent,allUsersForStudent,allUsersForNonStudent}=require("../controller/userControllers");
-const {accessChat, fetchChats, createGroupChat, renameGroup, addToGroup,removeFromGroup,updateGroupChatAdminMode,getChatById}=require("../controller/chatControllers")
+const {accessChat, fetchChats, createGroupChat, renameGroup, addToGroup,removeFromGroup,updateGroupChatAdminMode,getChatById,makeAdmin}=require("../controller/chatControllers")
 const {teacherFileMessage}=require("../controller/imageAndPdf")
 const {sendMessage,allMessages,updateMessageForDeletion} =require("../controller/messageControllers")
 
@@ -54,6 +54,8 @@ router.post("/chat-isteacher",makeUserTeacher);// for one time use to make istea
 router.post("/chat-isstudent",makeUserStudent);// for one time use to make isstudent===true
 
 router.post("/chat-isteacher-image",teacherFileMessage);
+
+router.post("/chat-group-add-admin",makeAdmin);
 
 // router.post("/student-singin",validateLogIn, singinStudents);
 
