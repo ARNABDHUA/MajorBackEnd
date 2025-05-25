@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 // const CourseRoutine = require("./models/routineModels");
-const { getAllReotines, addRoutines, deleteRoutine , addRoutinesNormal,deleteTimeSlot, updateSlotDetails , getRoutineByCourseIdAndSem, getAllRoutinbycourse_id,getAllCourses,createCourse,getAllCoursesBYId,findScheduleByPaperCodes} = require("../controller/controllerRoutine");
+const { getAllReotines, addRoutines, deleteRoutine , addRoutinesNormal,deleteTimeSlot, updateSlotDetails , getRoutineByCourseIdAndSem, getAllRoutinbycourse_id,getAllCourses,createCourse,getAllCoursesBYId,findScheduleByPaperCodes,deleteCourse} = require("../controller/controllerRoutine");
 const auth = require("../../../authMiddlewares/auth");
 const {validateAddRoutine,  addOrUpdateTimeSlotValidation,deleteTimeSlotValidation, updateSlotDetailsValidation, validateRoutineParams,validateCourse} =require("../middlewares/validationRoutine");
 
@@ -32,6 +32,8 @@ router.post("/course-all", getAllCourses );
 router.get("/course-all-id", getAllCoursesBYId );
 
 router.post("/create-course",validateCourse, createCourse);
+
+router.post("/delete-course", deleteCourse);
 
 
 module.exports = router;

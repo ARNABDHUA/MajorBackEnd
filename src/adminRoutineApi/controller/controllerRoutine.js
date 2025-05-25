@@ -1,5 +1,7 @@
 const CourseRoutine = require("../models/routineModels");
 const Course = require("../models/courseModel");
+const cloudinary =require("./cloudinary.js");
+const fs = require("fs");
 const getAllReotines = async (req, res) => {
   const { course_id } = req.body;
   try {
@@ -506,15 +508,50 @@ const getAllCoursesBYId = async (req, res) => {
 
 
 const createCourse = async (req, res) => {
+  const {course_id,name,code,description,bgColor,duration,instructor,students}=req.body
  
   try {
-    const existingCourse = await Course.findOne({ course_id: req.body.course_id });
+    const existingCourse = await Course.findOne({ course_id :course_id });
     if (existingCourse) {
       return res.status(400).json({ message: "Course ID already exists" });
     }
-    const newCourse = new Course(req.body);
+    if (!req.files || !req.files.image) {
+      return res
+        .status(400)
+        .json({ error: 'Image files are required' });
+    }
+
+    // Upload image to Cloudinary
+    const imageResult = await cloudinary.uploader.upload(
+      req.files.image.tempFilePath,
+      {
+        folder: 'courses/images',
+        resource_type: 'image',
+      }
+    );
+
+    // Clean up temp files
+    fs.unlinkSync(req.files.image.tempFilePath);
+
+    // Create new paper document
+    const newCourse = new Course({
+      course_id,
+      name,
+      code,
+      description,
+      bgColor,
+      duration,
+      instructor,
+      students,
+      imageUrl: imageResult.secure_url
+    });
+
     await newCourse.save();
-    res.status(201).json(newCourse);
+
+    res.status(201).json({ message: 'Paper created successfully', newCourse });
+    // const newCourse = new Course(req.body);
+    // await newCourse.save();
+    // res.status(201).json(newCourse);
   } catch (error) {
     console.error("Error creating course:", error); // Log the error to see details
     res.status(500).json({ message: "Error creating course", error: error.message });
@@ -594,4 +631,28 @@ const findScheduleByPaperCodes = async (req, res) => {
     });
   }
 };
-module.exports = { getAllReotines, addRoutines, deleteRoutine,addRoutinesNormal ,deleteTimeSlot ,updateSlotDetails , getRoutineByCourseIdAndSem , getAllRoutinbycourse_id,getAllCourses, createCourse,getAllCoursesBYId,findScheduleByPaperCodes};
+
+const deleteCourse = async (req, res) => {
+  try {
+    const { course_id } = req.body;
+
+    // Validate that course_id is provided and is a number
+    if (!course_id || isNaN(course_id)) {
+      return res.status(400).json({ success: false, message: "Valid course_id is required" });
+    }
+
+    // Attempt to delete the course with the specified course_id
+    const result = await Course.deleteOne({ course_id: Number(course_id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ success: false, message: `No course found with course_id ${course_id}` });
+    }
+
+    return res.status(200).json({ success: true, message: `Course with course_id ${course_id} deleted successfully` });
+  } catch (error) {
+    console.error("Error deleting course:", error);
+    return res.status(500).json({ success: false, message: "Internal server error", error: error.message });
+  }
+};
+
+module.exports = { getAllReotines, addRoutines, deleteRoutine,addRoutinesNormal ,deleteTimeSlot ,updateSlotDetails , getRoutineByCourseIdAndSem , getAllRoutinbycourse_id,getAllCourses, createCourse,getAllCoursesBYId,findScheduleByPaperCodes,deleteCourse};
