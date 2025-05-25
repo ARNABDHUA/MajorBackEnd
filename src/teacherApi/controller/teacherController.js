@@ -423,7 +423,7 @@ const logInTeacher= async(req,res)=>{
       // Update the teacher's course_code array
       const updatedTeacher = await Teacher.findOneAndUpdate(
         { c_roll },
-        { $set: { course_code: uniqueCourseCodes } },
+        { $set: { course_code: uniqueCourseCodes ,hod :false} },
         { new: true }
       );
   
