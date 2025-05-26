@@ -221,13 +221,22 @@ const getTotalClassesCount = async (req, res) => {
 
 const getPresentStudentsByPaperCode = async (req, res) => {
     try {
-      const { paper_code ,course_code } = req.body;
+      const { paper_code  } = req.body;
+      // const { paper_code ,course_code } = req.body;//old
   
       // Validate paper_code parameter
-      if (!paper_code && course_code) {
+
+      // if (!paper_code && course_code) {
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "paper_code and course_code both are required"
+      //   });
+      // }//old
+
+      if (!paper_code) {
         return res.status(400).json({
           success: false,
-          message: "paper_code and course_code both are required"
+          message: "paper_code is required"
         });
       }
       
@@ -258,7 +267,7 @@ const getPresentStudentsByPaperCode = async (req, res) => {
       // Get total number of students (present or not) for this paper code today
       const totalStudents = await Student.countDocuments({
         payment:true, 
-        course_code:course_code,
+        // course_code:course_code,//old
         paper_code:paper_code//add today
       });
   
