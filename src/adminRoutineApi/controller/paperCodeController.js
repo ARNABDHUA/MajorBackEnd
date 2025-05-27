@@ -246,12 +246,12 @@ const CoursePaper = require('../models/paperCodeModel');
       if (new_paper_code) {
         // Check if new code already exists
         const newCodeExists = coursePaper.papers.some(p => p.paper_code === new_paper_code);
-        if (newCodeExists) {
-          return res.status(400).json({
-            success: false,
-            message: 'New paper code already exists'
-          });
-        }
+        // if (newCodeExists) {
+        //   return res.status(400).json({
+        //     success: false,
+        //     message: 'New paper code already exists'
+        //   });
+        // }
         coursePaper.papers[paperIndex].paper_code = new_paper_code;
       }
       
