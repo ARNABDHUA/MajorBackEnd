@@ -9,7 +9,7 @@ const fs = require("fs");
 const SECRET_KEY="helloArnab";
 
 const emailotpsignup=require('../../studentApi/models/emailsender');
-const { sendEmailService } = require("../service/mailService");
+const { sendEmailService,sendInterviewEmailService,sendRejectEmailService } = require("../service/mailService");
 const { sendEmailServices } = require("../service/otpEmailService");
 
 const createTeacher = async (req, res) => {
@@ -669,6 +669,8 @@ const vaidateTeacher=async(req,res)=>{
     if (!record) {
       return res.status(400).json({ success: false, message: "new Teacher not found" });
     }
+    const name=record.name;//add
+    const sendMail= await sendInterviewEmailService(email,name)//add
     return res.status(200).json({ success: true, message: "verify the Teacher" ,data:record});
 
   } catch (error) {
@@ -688,6 +690,8 @@ const vaidateTeacher=async(req,res)=>{
     if (!record) {
       return res.status(400).json({ success: false, message: "new Teacher not found" });
     }
+    const name=record.name;//add
+    const sendMail= await sendRejectEmailService(email,name)//add
     return res.status(200).json({ success: true, message: "Rejected the Teacher" ,data:record});
 
   } catch (error) {
