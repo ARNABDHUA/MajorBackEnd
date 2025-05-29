@@ -292,7 +292,7 @@ const CoursePaper = require('../models/paperCodeModel');
       const initialLength = coursePaper.papers.length;
       coursePaper.papers = coursePaper.papers.filter(p => p.paper_code !== paper_code);
 
-      if(initialLength===1 && coursePaper.papers=== 0 ){// add
+      if(initialLength===1 && coursePaper.papers.length=== 0 ){// add
 
         const result = await CoursePaper.findOneAndDelete({ 
           course_code:(course_code), 
