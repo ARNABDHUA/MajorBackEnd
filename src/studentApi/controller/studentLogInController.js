@@ -459,7 +459,7 @@ const sendEmailController = async (req, res) => {
   const { email } = req.body;
   let data="arnabdhua74@gmail.com"
 
-  const check = await Student.findOne({ email });
+  const check = await User.findOne({ email });//change to user
   if (!check && email!==data) {
     try {
       let otp = await sendEmailService(email);

@@ -25,7 +25,7 @@ const sendEmailServices = async (receiverEmail) => {
     text: `Your OTP verification code is: ${otp} for ecollege Sign up. This code will expire in 10 minutes.`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-        <h2 style="color: #333;">E-college Sign up OTP</h2>
+        <h2 style="color: #333;">E-college OTP</h2>
         <p>Your one-time password (OTP) is:</p>
         <h1 style="background-color: #f2f2f2; padding: 10px; text-align: center; font-size: 24px; letter-spacing: 5px;">${otp}</h1>
         <p>This code will expire in 10 minutes.</p>

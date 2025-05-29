@@ -83,7 +83,7 @@ We look forward to meeting you!`,
         <div style="background-color: #f2f2f2; padding: 15px; border-radius: 5px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #333;">Interview Details</h3>
           <p><strong>Address:</strong> EM-4/1, Sector-V, Salt Lake, Kolkata – 700091</p>
-          <p><strong>Interview Date:</strong> 28-05-2025 (Tomorrow)</p>
+         
         </div>
         
         <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">

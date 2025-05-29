@@ -86,7 +86,7 @@ app.post("/payment", async (req, res) => {
         customer_phone: phone,
       },
       order_meta: {
-        return_url: "http://localhost:5173?order_id={order_id}",
+        return_url: `https://www.ecollege.software/payment/${orderId}`,//http://localhost:5173
         notify_url: "https://webhook.site", // Replace with your webhook URL if needed
       },
     };
