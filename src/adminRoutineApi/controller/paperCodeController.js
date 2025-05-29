@@ -291,6 +291,18 @@ const CoursePaper = require('../models/paperCodeModel');
       // Filter out the paper to remove
       const initialLength = coursePaper.papers.length;
       coursePaper.papers = coursePaper.papers.filter(p => p.paper_code !== paper_code);
+
+      if(initialLength===1 && coursePaper.papers=== 0 ){// add
+
+        const result = await CoursePaper.findOneAndDelete({ 
+          course_code:(course_code), 
+          sem 
+        });
+        return res.status(200).json({
+          success: true,
+          message: 'All Papers in the sem is deleted'
+        });
+      }//add
       
       // Check if paper was found and removed
       if (coursePaper.papers.length === initialLength) {
